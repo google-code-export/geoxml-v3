@@ -14,7 +14,10 @@ function KMLObj(title,desc,op,fid) {
 	this.open = op;
 	this.folderid = fid;
 	}
-
+if (typeof console === "undefined" || typeof console.log === "undefined") {
+	console = {};
+	console.log = function() {};
+}
 function Lance$(mid){ return document.getElementById(mid);}
 var topwin = self;
 var G = google.maps;
@@ -357,8 +360,9 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 				}
 			}
 	    markeroptions.icon = icon;
-	 
-	    markeroptions.title = name;
+		var ta=document.createElement("textarea");
+		ta.innerHTML=name;
+		markeroptions.title = ta.value;
 		//markeroptions.image = icon.image;
 		var start = icon.url.substring(0,4); //handle relative urls
 		if(start.match(/^http/i)) {
