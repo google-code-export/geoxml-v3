@@ -3003,7 +3003,7 @@ GeoXml.prototype.ParseURL = function (){
 				for(m = 0;m < marks.length;m++){
 				nae = marks[m].id;
 				if(nae == val){
-						this.overlayman.markers[m].show();
+						this.overlayman.markers[m].setVisible(true);
 						this.overlayman.markers[m].hidden = false; 
 						google.maps.event.trigger(this.overlayman.markers[m],"click");
 						break;
@@ -3021,7 +3021,7 @@ GeoXml.prototype.ParseURL = function (){
 				for(m = 0;m<marks.length;m++){
 					nae = marks[m].title;
 					if(nae == val){	
-						this.overlayman.markers[m].show();
+						this.overlayman.markers[m].setVisible(true);
 						this.overlayman.markers[m].hidden = false;
 					 	google.maps.event.trigger(this.overlayman.markers[m],"click");
 				 		break;
