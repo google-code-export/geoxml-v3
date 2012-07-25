@@ -4091,7 +4091,7 @@ MessageBox.prototype.showMess = function (val,temp){
 				}
 		var d = this.map.getDiv();
 		var w = this.mb.offsetWidth/2;
-		var h = this.mb.ofsetHeigtht/2;
+		var h = this.mb.offsetHeight/2;
 		this.mb.style.left = parseInt(d.offsetWidth/2 - w) + "px";
 		this.mb.style.top = parseInt(d.offsetHeight/2 - h) + "px";
 		this.mb.style.width = "";
