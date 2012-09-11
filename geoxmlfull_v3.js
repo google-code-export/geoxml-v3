@@ -3445,6 +3445,20 @@ google.maps.Polygon.prototype.getBounds = function() {
 google.maps.Polygon.prototype.getCenter = function() {
 	return (this.getBounds().getCenter()); 
   };
+  
+  
+OverlayManagerView.prototype = new google.maps.OverlayView();
+function OverlayManagerView(map) {
+  this.setMap(map);
+};
+
+OverlayManagerView.prototype.onAdd = function() {
+};
+OverlayManagerView.prototype.draw  = function() {
+};
+OverlayManagerView.prototype.onRemove  = function() {
+};
+
 OverlayManager = function ( map , paren ) {
     this.myvar = paren.myvar;
     this.paren = paren;
