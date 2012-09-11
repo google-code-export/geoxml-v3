@@ -2652,7 +2652,9 @@ GeoXml.prototype.processKML = function(node, marks, title, sbid, depth, paren) {
 	var opacity = 1.0;
 	var wmsbounds;
 	var makewms = false;
+	var makeground = false;
 	var wmslist = [];
+	var groundlist = [];
 	var mytitle;
 	var color;
 	var ol;
@@ -2724,11 +2726,16 @@ GeoXml.prototype.processKML = function(node, marks, title, sbid, depth, paren) {
 					}
 				else {
 					wmsbounds = new google.maps.LatLngBounds(sw,ne);
-      				ground = new GGroundOverlay(url, wmsbounds);
+					ground = new google.maps.GroundOverlay(url, wmsbounds);
+					ground.url = url;
+					ground.title = mytitle;
+					ground.visible = visible;
 					ground.bounds = wmsbounds;
 					ground.getBounds = function(){ return this.bounds;};
 					boundsmodified = true;
-					makewms = false;
+					makeground = true;
+					if(!this.quiet){ this.mb.showMess("Adding GroundOverlay "+title,1000);}
+					groundlist.push(ground);
       			 	}
 				}
 				break;
@@ -2835,27 +2842,30 @@ GeoXml.prototype.processKML = function(node, marks, title, sbid, depth, paren) {
 			}
 		}
 	
-	if(ground){
-		if (this.basesidebar) {
-    			var n = this.overlayman.markers.length;
-    			var blob = '<span style="background-color:black;border:2px solid brown;">&nbsp;&nbsp;&nbsp;&nbsp;</span> ';
-			if(this.sidebarsnippet && snippet==""){
-				snippet = GeoXml.stripHTML(desc);
-				desc2 = desc2.substring(0,40);}
-   			parm =  this.myvar+"$$$" +title + "$$$polygon$$$" + n +"$$$" + blob + "$$$" +visible+"$$$null$$$"+snippet; 
-   		 
-			var html = desc;
-			var thismap = this.map;
-			google.maps.event.addListener(ground,"zoomto", function() { 
-						thismap.fitBounds(ground.getBounds());
-						});
-			this.overlayman.folderBounds[idx].extend(ground.getBounds().getSouthWest());
-			this.overlayman.folderBounds[idx].extend(ground.getBounds().getNorthEast());
-			boundsmodified = true;
-			this.overlayman.AddMarker(ground,title,idx, parm, visible);
-			}
-		ground.setMap(this.map);
+	if(makeground && groundlist.length){
+		for(var gro=0;gro<groundlist.length;gro++) {
+			if (this.basesidebar) {
+				var n = this.overlayman.markers.length;
+				var blob = '<span style="background-color:black;border:2px solid brown;">&nbsp;&nbsp;&nbsp;&nbsp;</span> ';
+				if(this.sidebarsnippet && snippet==""){
+					snippet = GeoXml.stripHTML(desc);
+					desc2 = desc2.substring(0,40);}
+				parm =  this.myvar+"$$$" +groundlist[gro].title + "$$$polygon$$$" + n +"$$$" + blob + "$$$" +groundlist[gro].visible+"$$$null$$$"+snippet; 
+			 
+				var html = groundlist[gro].desc;
+				var thismap = this.map;
+				google.maps.event.addListener(groundlist[gro],"zoomto", function() { 
+							thismap.fitBounds(groundlist[gro].getBounds());
+							});
+				this.overlayman.folderBounds[idx].extend(groundlist[gro].getBounds().getSouthWest());
+				this.overlayman.folderBounds[idx].extend(groundlist[gro].getBounds().getNorthEast());
+				boundsmodified = true;
+				this.overlayman.AddMarker(groundlist[gro],title,idx, parm, visible);
+				}
+			groundlist[gro].setMap(this.map);
 		}
+	}
+
 
 
 	for(i=0;i<pm.length;i++) {
