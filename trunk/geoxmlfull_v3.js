@@ -580,7 +580,10 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 						}
 					}
 				};
+			google.maps.event.addListener(m, "mouseover", m.onOver);
+	        google.maps.event.addListener(m, "mouseout", m.onOut);
 			}
+			
 	    if (!!this.opts.addmarker) {
 	        this.opts.addmarker(m, name, idx, parm, visible);
 	    } else {
