@@ -127,6 +127,9 @@ function GeoXml(myvar, map, url, opts) {
   try {topname=top.title;}
   	catch(err){topwin=self;}
   if(topwin.publishdirectory){this.publishdirectory = topwin.publishdirectory; }
+  if(opts.publishdirectory){
+	this.publishdirectory = opts.publishdirectory;
+  	}
   if(topwin.standalone){this.publishdirectory = "";}
   this.kmlicon =  this.publishdirectory +"images/ge.png";
   this.docicon = this.publishdirectory +"images/ge.png";
@@ -3726,7 +3729,7 @@ OverlayManager.Display = function (overlaymanager){
 	if(overlaymanager.map.getBounds()) {
 		// Expand the bounds a little, so things look smoother when scrolling
 		// by small amounts.
-		  bounds = overlaymanager.getMapBounds();
+		  bounds = overlaymanager.getMapBounds(overlaymanager);
 		  //alert(bounds);
 		  sw = bounds.getSouthWest();
 		  ne = bounds.getNorthEast();
@@ -3743,7 +3746,7 @@ OverlayManager.Display = function (overlaymanager){
 		}
 	if(!!!bounds && overlaymanager.map){
 		//alert("finding bounds");
-		bounds = overlaymanager.getMapBounds();
+		bounds = overlaymanager.getMapBounds(overlaymanager);
 		if(!!!bounds)return;
 		}
     // Partition the markers into visible and non-visible lists.
