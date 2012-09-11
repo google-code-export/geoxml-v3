@@ -2733,7 +2733,7 @@ GeoXml.prototype.processKML = function(node, marks, title, sbid, depth, paren) {
 				}
 				break;
 		 	case "NetworkLink":
-			       url = this.getText(nextn.getElementsByTagName("href")[0]);
+			    urllist.push(this.getText(nextn.getElementsByTagName("href")[0]));
 				networklink = true;
 				break;
 			case "description" :
