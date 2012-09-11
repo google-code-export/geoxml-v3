@@ -3441,18 +3441,18 @@ OverlayManager = function ( map , paren ) {
     this.folderhtml = [];
     this.folderhtmlast = [];
     this.subfolders = [];
+	
     this.currentZoomLevel = map.getZoom();
     this.isParsed = false;
-
+	this.overlayview = new OverlayManagerView(map);
+	
     this.maxVisibleMarkers = OverlayManager.defaultMaxVisibleMarkers;
     this.gridSize = OverlayManager.defaultGridSize;
     this.minMarkersPerCluster = OverlayManager.defaultMinMarkersPerCluster;
     this.maxLinesPerInfoBox = OverlayManager.defaultMaxLinesPerInfoBox;
     this.icon = OverlayManager.defaultIcon;
 	google.maps.event.addListener( this.paren, 'adjusted',OverlayManager.MakeCaller( OverlayManager.Display, this ) );
-	google.maps.event.addListener( map, 'idle', OverlayManager.MakeCaller( OverlayManager.Display, this ) );
-    //google.maps.event.addListener( map, 'zoomend', OverlayManager.MakeCaller( OverlayManager.Display, this ) );
-   // google.maps.event.addListener( map, 'moveend', OverlayManager.MakeCaller( OverlayManager.Display, this ) );
+	google.maps.event.addListener( map, 'idle', OverlayManager.MakeCaller( OverlayManager.Display, this ) ); 
     google.maps.event.addListener( map, 'infowindowclose', OverlayManager.MakeCaller( OverlayManager.PopDown, this ) );
 	this.icon.pane = this.paren.markerpane;
     };
@@ -3694,7 +3694,7 @@ OverlayManager.Display = function (overlaymanager){
 	if(overlaymanager.map.getBounds()) {
 		// Expand the bounds a little, so things look smoother when scrolling
 		// by small amounts.
-		  bounds = overlaymanager.map.getBounds();
+		  bounds = overlaymanager.getMapBounds();
 		  //alert(bounds);
 		  sw = bounds.getSouthWest();
 		  ne = bounds.getNorthEast();
@@ -3711,7 +3711,7 @@ OverlayManager.Display = function (overlaymanager){
 		}
 	if(!!!bounds && overlaymanager.map){
 		//alert("finding bounds");
-		bounds = overlaymanager.map.getBounds();
+		bounds = overlaymanager.getMapBounds();
 		if(!!!bounds)return;
 		}
     // Partition the markers into visible and non-visible lists.
@@ -3984,7 +3984,36 @@ OverlayManager.PopUp = function ( group )
 	this.paren.lastMarker.infoWindow.open(this.paren.map);
     overlaymanager.poppedUpCluster = group;
     };
+	
+OverlayManager.prototype.getMapBounds = function (overlaymanager) {
+var bounds;
+if (overlaymanager.map.getZoom() > 1) {
+   bounds = new google.maps.LatLngBounds(overlaymanager.map.getBounds().getSouthWest(),
+   overlaymanager.map.getBounds().getNorthEast()); 
+   } 
+   else {
+    bounds = new google.maps.LatLngBounds(new google.maps.LatLng(-85.08136444384544, -178.48388434375), new google.maps.LatLng(85.02070771743472, 178.00048865625));
+	}
+ 
+	var projection = overlaymanager.overlayview.getProjection();
+	var tr = new google.maps.LatLng(bounds.getNorthEast().lat(),bounds.getNorthEast().lng());
+	var bl = new google.maps.LatLng(bounds.getSouthWest().lat(),bounds.getSouthWest().lng());
+  // Convert the points to pixels and the extend out by the grid size.
+  var trPix = projection.fromLatLngToDivPixel(tr);
+  trPix.x += overlaymanager.gridSize;
+  trPix.y -= overlaymanager.gridSize;
+  var blPix = projection.fromLatLngToDivPixel(bl);
+  blPix.x -= overlaymanager.gridSize;
+  blPix.y += overlaymanager.gridSize;
 
+ // Convert the pixel points back to LatLng
+	var ne = projection.fromDivPixelToLatLng(trPix);
+	var sw = projection.fromDivPixelToLatLng(blPix);
+ // Extend the bounds to contain the new bounds.
+	bounds.extend(ne);
+	bounds.extend(sw);
+	return bounds;
+};
 
 OverlayManager.RePop = function ( overlaymanager )
     {
