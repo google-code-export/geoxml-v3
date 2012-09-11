@@ -2639,6 +2639,7 @@ GeoXml.prototype.processKML = function(node, marks, title, sbid, depth, paren) {
 		}
 	var pm = [];
 	var sf = [];
+	var urllist = [];
 	var desc= "";
 	var snippet ="";
 	var i;
@@ -2793,17 +2794,21 @@ GeoXml.prototype.processKML = function(node, marks, title, sbid, depth, paren) {
 
 	if(networklink){
 		var re = /&amp;/g;
-		url = url.replace(re,"&");
-		var nl = /\n/g;
-		url = url.replace(nl,"");
- 		this.progress++;	
-		if(!topwin.standalone){
-			if(typeof this.proxy!="undefined") { url = this.proxy + escape(url); } 
-			}
-	 	var comm = this.myvar +".loadXMLUrl('"+url+"','"+title+"',null,null,'"+sbid+"');";
-		setTimeout(comm,1000);
-		return;
+		for (x=0;x<urllist.length;x++) {
+			url = urllist[x];
+			url = url.replace(re,"&");
+			var nl = /\n/g;
+			url = url.replace(nl,"");
+			var qu = /'/g;
+			title = title.replace(qu,"&#39;");
+			this.progress++;	
+			if(!top.standalone){
+				if(typeof this.proxy!="undefined") { url = this.proxy + escape(url); } 
+				}
+			var comm = this.myvar +".loadXMLUrl('"+url+"','"+title+"',null,null,'"+sbid+"');";
+			setTimeout(comm,1000);
 		}
+	}
 
 	if(makewms && wmslist.length){
 		for(var wo=0;wo<wmslist.length;wo++) {
