@@ -323,7 +323,7 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 
 	    if (this.opts.baseicon) {
 			bicon.size = this.opts.baseicon.size;
-			bicon.origin = this.opts.baseicon.orgin;
+			bicon.origin = this.opts.baseicon.origin;
 			bicon.anchor = this.opts.baseicon.anchor;
 			if (scale){
 				if(instyle){
