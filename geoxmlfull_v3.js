@@ -280,6 +280,35 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 			scale = instyle.scale;
 			}
 		var bicon;
+		
+
+		if (markerurl == ""){
+			var fs = (10*scale)+"px";
+			var style = { fontSize: fs, fontFamily: "Verdana, Arial, Sans-serif" };
+            var m = new GeoXml.Label(point,name,"",this.map, style);
+			m.title = name;
+			m.id = kml_id;
+			var obj = { "type": "point", "title": name, "description": name, "href": href, "shadow": shadow, "visibility": visible, "x": point.x, "y": point.y, "id": m.id };
+			this.kml[idx].marks.push(obj);
+			var parm;
+			var blob ="&nbsp;";
+			var desc2="";
+			if(this.tileset){
+				parm = this.tileset + "$$$" + name + "$$$marker$$$" + n + "$$$" + blob + "$$$" + visible + "$$$null$$$" + desc2;
+				m.sidebarid = this.tileset + "sb" + n;
+				}
+			else {
+				parm = this.myvar + "$$$" + name + "$$$marker$$$" + n + "$$$" + blob + "$$$" + visible + "$$$null$$$" + desc2;
+				m.sidebarid = this.myvar + "sb" + n;
+				}
+			if (!!this.opts.addmarker) {
+				this.opts.addmarker(m, name, idx, parm, visible);
+			} else {
+				this.overlayman.AddMarker(m, name, idx, parm, visible);
+				} 
+			return;
+			}
+			
 		if(instyle){
 			bicon = instyle;
 			}
@@ -4612,3 +4641,87 @@ GeoXml.prototype.DownloadURL = function (fpath,callback,title){
         }
 
 };
+
+          GeoXml.Label = function(pos, txt, cls, map, style){
+                this.pos = pos;
+                this.txt_ = txt;
+                this.cls_ = cls;
+                this.map_ = map;
+				this.style_ = style;
+                this.div_ = null;
+
+                // Explicitly call setMap() on this overlay
+                this.setMap(map);
+            }
+
+            GeoXml.Label.prototype = new google.maps.OverlayView();
+
+            GeoXml.Label.prototype.onAdd = function(){
+	
+                var div = document.createElement('DIV');
+           
+                div.innerHTML = this.txt_;
+
+                // Set the overlay's div_ property to this DIV
+                this.div_ = div;
+				this.div_.style.position = "absolute";
+                var overlayProjection = this.getProjection();
+                var position = overlayProjection.fromLatLngToDivPixel(this.pos);
+				this.div_.style.fontSize = this.style_.fontSize;
+				this.div_.style.fontFamily = this.style_.fontFamily;
+                div.style.left = position.x + 'px';
+                div.style.top = position.y + 'px';
+                // We add an overlay to a map via one of the map's panes.
+                var panes = this.getPanes();
+                panes.floatPane.appendChild(div);
+            }
+			GeoXml.Label.prototype.getPosition = function () {
+				return this.pos;
+				}
+            GeoXml.Label.prototype.draw = function(){
+
+
+                var overlayProjection = this.getProjection();
+                var position = overlayProjection.fromLatLngToDivPixel(this.pos);
+                var div = this.div_;
+                div.style.left = position.x + 'px';
+                div.style.top = position.y + 'px';
+				}
+      
+            GeoXml.Label.prototype.onRemove = function(){
+				//console.log("label is being removed");
+                this.div_.parentNode.removeChild(this.div_);
+                this.div_ = null;
+            }
+            GeoXml.Label.prototype.hide = function(){
+                if (this.div_) {
+                    this.div_.style.visibility = "hidden";
+					//console.log("label is being hidden");
+					}
+				}
+
+            GeoXml.Label.prototype.show = function(){
+                if (this.div_) {
+                    this.div_.style.visibility = "visible";
+                }
+            }
+
+            GeoXml.Label.prototype.toggle = function(){
+                if (this.div_) {
+                    if (this.div_.style.visibility == "hidden") {
+                        this.show();
+                    }
+                    else {
+                        this.hide();
+                    }
+                }
+            }
+
+            GeoXml.Label.prototype.toggleDOM = function(){
+                if (this.getMap()) {
+                    this.setMap(null);
+                }
+                else {
+                    this.setMap(this.map_);
+                }
+            }
