@@ -570,6 +570,7 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 					}
 			geoxml.lastMarker = m;
 			}
+			if (!m.onMap) { geoxml.map.panTo(m.getPosition()); }
 			this.infoWindow.open(this.map, this);
 			});
 	
@@ -3009,10 +3010,10 @@ GeoXml.prototype.processGPX = function(node,title,sbid,depth) {
 	var folderid;
 	var idx = this.overlayman.folders.length;
 	if(pm.length || node.nodeName == "gpx"){
-       		this.overlayman.folders.push([]);
+       	this.overlayman.folders.push([]);
 		this.overlayman.subfolders.push([]);
-    		this.overlayman.folderhtml.push([]);
-    		this.overlayman.folderhtmlast.push(0);
+    	this.overlayman.folderhtml.push([]);
+    	this.overlayman.folderhtmlast.push(0);
 		this.overlayman.folderBounds.push(new google.maps.LatLngBounds());
 		this.kml.push(new KMLObj(title,desc,open,idx));
 		folderid = this.createFolder(idx, title, sbid, icon, desc, snip, true, visible);
