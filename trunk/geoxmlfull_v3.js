@@ -285,10 +285,14 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 		 
 		
 		if (instyle.url == "" && this.showLabels){
-			//alert("adding marker "+point);
-			var fs = (10*scale)+"px";
+			if ((scale*12)< 7){
+				scale = 0.6;
+				}
+			var fs = (12*scale)+"px";
 			var style = { fontSize: fs, fontFamily: "Verdana, Arial, Sans-serif" };
-			
+			if (instyle && instyle.textColor){
+				style.color = instyle.textColor;
+				}
             var m = new GeoXml.Label(point,name,"",this.map, style);
 			m.title = name;
 			m.id = kml_id;
@@ -309,8 +313,7 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 				this.opts.addmarker(m, name, idx, parm, visible);
 			} else {
 				this.overlayman.AddMarker(m, name, idx, parm, visible);
-				} 
-			return;
+				}
 			}
 			
 		if(instyle){
@@ -2614,6 +2617,30 @@ GeoXml.prototype.handleStyle = function(style,sid,currstyle){
 		tempstyle.scale = myscale;
 		that.styles[strid] = tempstyle;
       	}
+
+	  var labelstyles =style.getElementsByTagName("LabelStyle");
+	  if (labelstyles.length > 0){
+	  
+		var scale = parseFloat(this.getText(labelstyles[0].getElementsByTagName("scale")[0]),10);
+		color = this.getText(labelstyles[0].getElementsByTagName("color")[0]);
+        aa = color.substr(0,2);
+        bb = color.substr(2,2);
+        gg = color.substr(4,2);
+        rr = color.substr(6,2);
+        color = "#" + rr + gg + bb;
+        opacity = parseInt(aa,16)/256;
+		if(that.opts.overrideOpacity){
+			opacity = that.opts.overrideOpacity;
+			}
+        if (!!!that.styles[strid]) {
+          that.styles[strid] = {};
+		  }
+        that.styles[strid].textColor = color;
+		if (scale == 0) {
+			scale = 1;
+			}
+        that.styles[strid].scale = scale;
+		}
       // is it a LineStyle ?
       var linestyles=style.getElementsByTagName("LineStyle");
       if (linestyles.length > 0) {
