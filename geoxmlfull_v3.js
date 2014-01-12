@@ -340,7 +340,7 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 			scale = instyle.scale;
 			}
 		var bicon;
-		if ((instyle && (typeof instyle.url == "undefined" || instyle.url =="")) && this.showLabels){
+		if ((instyle && (typeof instyle.url == "undefined" || instyle.url == "")) && this.showLabels){
 			if ((scale*12)< 7){
 				scale = 0.6;
 				}
@@ -356,7 +356,7 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 			var obj = { "type": "point", "title": name, "description": name, "href": href, "shadow": shadow, "visibility": visible, "x": point.x, "y": point.y, "id": m.id };
 			this.kml[idx].marks.push(obj);
 			var parm;
-			var blob ="&nbsp;";
+			var blob ="<span>&nbsp;</span>";
 			var desc2="";
 			if(this.tileset){
 				parm = this.tileset + "$$$" + name + "$$$marker$$$" + n + "$$$" + blob + "$$$" + visible + "$$$null$$$" + desc2;
@@ -369,7 +369,7 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 			if (!!this.opts.addmarker) {
 				this.opts.addmarker(m, name, idx, parm, visible);
 			} else {
-				this.overlayman.AddMarker(m, name, idx, parm, visible);
+				this.overlayman.addMarker(m, name, idx, parm, visible);
 				}
 			return;
 			}
@@ -2517,7 +2517,6 @@ GeoXml.prototype.handlePlacemarkGeometry = function(mark, geom, idx, depth, full
                     box_count++; processme = true; break;
                 case "styleurl":
                     styleid = nv;
-					var currstyle = style;
 					style = that.styles[styleid];
                     break;
                 case "stylemap":
@@ -2562,7 +2561,7 @@ GeoXml.prototype.handlePlacemarkGeometry = function(mark, geom, idx, depth, full
         if (!name && title) { name = title; }
 
         if (fullstyle) {
-			alert("overriding style with" +fullstyle.url);
+			//alert("overriding style with" +fullstyle.url);
             style = fullstyle;
 			}
 	  var iwheightstr;
@@ -2824,14 +2823,16 @@ GeoXml.prototype.handleStyle = function(style,sid,currstyle){
 		if(currstyle){
 			href = currstyle.url;
 			}
-		var scale = parseFloat(this.getText(icons[0].getElementsByTagName("scale")[0]),10);
-		if(scale){
-			myscale = scale;
+		if (href) {
+			var scale = parseFloat(this.getText(icons[0].getElementsByTagName("scale")[0]),10);
+			if(scale){
+				myscale = scale;
+				}
+			var hs = icons[0].getElementsByTagName("hotSpot");
+			tempstyle = this.makeIcon(currstyle,href,myscale,hs[0]);
+			tempstyle.scale = myscale;
+			that.styles[strid] = tempstyle;
 			}
-		var hs = icons[0].getElementsByTagName("hotSpot");
-		tempstyle = this.makeIcon(currstyle,href,myscale,hs[0]);
-		tempstyle.scale = myscale;
-		that.styles[strid] = tempstyle;
       	}
 		
 	  var labelstyles =style.getElementsByTagName("LabelStyle");
