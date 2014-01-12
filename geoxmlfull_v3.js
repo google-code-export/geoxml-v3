@@ -291,6 +291,7 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 			if (instyle && instyle.textColor){
 				style.color = instyle.textColor;
 				}
+			//console.log("labelColor="+instyle.textColor);
             var m = new GeoXml.Label(point,name,"",this.map, style);
 			m.title = name;
 			m.id = kml_id;
@@ -2336,7 +2337,7 @@ GeoXml.prototype.handlePlacemarkGeometry = function(mark, geom, idx, depth, full
         if (!name && title) { name = title; }
 
         if (fullstyle) {
-			console.log("overriding style with" +fullstyle.url);
+			//console.log("overriding style with" +fullstyle.url);
             style = fullstyle;
 			}
 			
@@ -4727,6 +4728,7 @@ GeoXml.prototype.DownloadURL = function (fpath,callback,title){
                 var overlayProjection = this.getProjection();
                 var position = overlayProjection.fromLatLngToDivPixel(this.pos);
 			//	alert(this.pos);
+				this.div_.style.color = this.style_.color;
 				this.div_.style.fontSize = this.style_.fontSize;
 				this.div_.style.fontFamily = this.style_.fontFamily;
                 div.style.left = position.x + 'px';
