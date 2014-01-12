@@ -275,6 +275,7 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 	   	var myvar = this.myvar;
 	    var icon;
 		var shadow;
+		//alert(name+" "+markerurl);
 	    var href;
 		var scale = 1;
 		if(instyle && instyle.scale){
@@ -283,7 +284,7 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 		var bicon;
 		 
 		
-		if (markerurl == "" && this.showLabels){
+		if (instyle.url == "" && this.showLabels){
 			//alert("adding marker "+point);
 			var fs = (10*scale)+"px";
 			var style = { fontSize: fs, fontFamily: "Verdana, Arial, Sans-serif" };
@@ -2402,7 +2403,7 @@ GeoXml.prototype.handlePlacemarkGeometry = function(mark, geom, idx, depth, full
 				if (path.length == 1 || path[1] == "") {
 						bits = path[0].split(",");
 						point = new google.maps.LatLng(parseFloat(bits[1]), parseFloat(bits[0]));
-				 
+					//	alert(point);
 						this.overlayman.folderBounds[idx].extend(point);
 						// Does the user have their own createmarker function?
 						if (!skiprender) {
