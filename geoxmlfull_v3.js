@@ -56,6 +56,7 @@ function GeoXml(myvar, map, url, opts) {
    // other useful "global" stuff
   this.hilite  = this.opts.hilite || { color:"#aaffff",opacity: 0.3, textcolor:"#000000" };
   this.latestsidebar = "";
+  this.showLabels = true;
   this.forcefoldersopen = false;
   if(typeof this.opts.allfoldersopen !="undefined"){ this.forcefoldersopen = this.opts.allfoldersopen;}
   this.dohilite = false;
@@ -280,11 +281,13 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 			scale = instyle.scale;
 			}
 		var bicon;
+		 
 		
-
-		if (markerurl == ""){
+		if (markerurl == "" && this.showLabels){
+			//alert("adding marker "+point);
 			var fs = (10*scale)+"px";
 			var style = { fontSize: fs, fontFamily: "Verdana, Arial, Sans-serif" };
+			
             var m = new GeoXml.Label(point,name,"",this.map, style);
 			m.title = name;
 			m.id = kml_id;
@@ -1171,6 +1174,7 @@ GeoXml.prototype.finishLineJSON = function(po, idx, lastlinename){
 GeoXml.prototype.handlePlaceObj = function(num, max, idx, lastlinename, depth){
 	var that = this;
 	var po = that.jsonmarks[num];
+	//alert(po+" "+num+" "+po.x+" "+po.y);
 	var name = po.name;
 	if(po.title){ name = po.title; }
 	if(name.length+depth > that.maxtitlewidth){ that.maxtitlewidth = name.length+depth; }
@@ -2353,66 +2357,81 @@ GeoXml.prototype.handlePlacemarkGeometry = function(mark, geom, idx, depth, full
 				desc = "<div id='currentpopup' style='overflow:auto;" + iwheightstr+"' >" + desc + "</div> ";
 				}
 			}
-
+ 
         if (newcoords && typeof lat != "undefined") {
             if (lat) {
-                var cs = "" + lon + "," + lat + " ";
+                var cs = "" + lon + "," + lat;
                 node = this.parseXML("<coordinates>" + cs + "</coordinates>");
-                coordset.push(node);
+                //coordset.push(node);
             }
         }
 
-
-
-        for (var c = 0; c < coordset.length; c++) {
-            var skiprender = false;
-            if (coordset[c].parentNode && (coordset[c].parentNode.nodeName.match(/^(gml:Box|gml:Envelope)/i))) {
-                skiprender = true;
-				}
-            coords = this.getText(coordset[c]);
-            coords += " ";
-            coords = coords.replace(/(\s)+/g, " ");
-            // tidy the whitespace
-            coords = coords.replace(/^ /, "");
-            // remove possible leading whitespace
-            //coords=coords +" "; 
-            ////ensure trailing space
-            coords = coords.replace(/, /, ",");
-            // tidy the commas
-            var path = coords.split(" ");
-            // Is this a polyline/polygon?
-
-            if (path.length == 1 || path[1] == "") {
-					bits = path[0].split(",");
-					point = new google.maps.LatLng(parseFloat(bits[1]), parseFloat(bits[0]));
-					this.overlayman.folderBounds[idx].extend(point);
-					// Does the user have their own createmarker function?
-					if (!skiprender) {
-						if (typeof name == "undefined") { name = that.unnamedplace; }
-						if (!!that.opts.createmarker) {
-							that.opts.createmarker(point, name, desc, styleid, idx, style, visible, kml_id, markerurl, snippet);
-						}
-						else {
-							that.createMarker(point, name, desc, styleid, idx, style, visible, kml_id, markerurl, snippet);
-						}
+		if(coordset.length == 0 && typeof lat!= "undefined") {
+			point = new google.maps.LatLng(lat, lon);
+			this.overlayman.folderBounds[idx].extend(point);
+						// Does the user have their own createmarker function?
+			if (!skiprender) {
+				if (typeof name == "undefined") { name = that.unnamedplace; }
+				if (!!that.opts.createmarker) {
+					that.opts.createmarker(point, name, desc, styleid, idx, style, visible, kml_id, markerurl, snippet);
+					}
+				else {
+					that.createMarker(point, name, desc, styleid, idx, style, visible, kml_id, markerurl, snippet);
 					}
 				}
-            else {
-                // Build the list of points
-                points = [];
-                pbounds = new google.maps.LatLngBounds();
-                for (p = 0; p < path.length - 1; p++) {
-                    bits = path[p].split(",");
-                    point = new google.maps.LatLng(parseFloat(bits[1]), parseFloat(bits[0]));
-                    points.push(point);
-                    pbounds.extend(point);
+			}
+		else {
+			for (var c = 0; c < coordset.length; c++) {
+				var skiprender = false;
+				if (coordset[c].parentNode && (coordset[c].parentNode.nodeName.match(/^(gml:Box|gml:Envelope)/i))) {
+					skiprender = true;
 					}
-                this.overlayman.folderBounds[idx].extend(pbounds.getSouthWest());
-                this.overlayman.folderBounds[idx].extend(pbounds.getNorthEast());
-                this.bounds.extend(pbounds.getSouthWest());
-                this.bounds.extend(pbounds.getNorthEast());
-                if (!skiprender) { lines.push(points); }
-            }
+				coords = this.getText(coordset[c]);
+				coords += " ";
+				coords = coords.replace(/(\s)+/g, " ");
+				// tidy the whitespace
+				coords = coords.replace(/^ /, "");
+				// remove possible leading whitespace
+				//coords=coords +" "; 
+				////ensure trailing space
+				coords = coords.replace(/, /, ",");
+				// tidy the commas
+				var path = coords.split(" ");
+				// Is this a polyline/polygon?
+
+				if (path.length == 1 || path[1] == "") {
+						bits = path[0].split(",");
+						point = new google.maps.LatLng(parseFloat(bits[1]), parseFloat(bits[0]));
+				 
+						this.overlayman.folderBounds[idx].extend(point);
+						// Does the user have their own createmarker function?
+						if (!skiprender) {
+							if (typeof name == "undefined") { name = that.unnamedplace; }
+							if (!!that.opts.createmarker) {
+								that.opts.createmarker(point, name, desc, styleid, idx, style, visible, kml_id, markerurl, snippet);
+							}
+							else {
+								that.createMarker(point, name, desc, styleid, idx, style, visible, kml_id, markerurl, snippet);
+							}
+						}
+					}
+				else {
+					// Build the list of points
+					points = [];
+					pbounds = new google.maps.LatLngBounds();
+					for (p = 0; p < path.length - 1; p++) {
+						bits = path[p].split(",");
+						point = new google.maps.LatLng(parseFloat(bits[1]), parseFloat(bits[0]));
+						points.push(point);
+						pbounds.extend(point);
+						}
+					this.overlayman.folderBounds[idx].extend(pbounds.getSouthWest());
+					this.overlayman.folderBounds[idx].extend(pbounds.getNorthEast());
+					this.bounds.extend(pbounds.getSouthWest());
+					this.bounds.extend(pbounds.getNorthEast());
+					if (!skiprender) { lines.push(points); }
+				}
+			}
         }
         if (!lines || lines.length < 1) { return; }
 		var nn = coordset[0].parentNode.nodeName;
@@ -2950,6 +2969,7 @@ GeoXml.prototype.processGPX = function(node,title,sbid,depth) {
 	var snip ="";
 	var i, lon, lat, l;
 	var open = this.forcefoldersopen;
+	this.showLabels = false;
 	var coords = "";
 	var visible = true;
 	for (var ln = 0; ln < node.childNodes.length; ln++) {
@@ -3266,6 +3286,7 @@ GeoXml.prototype.processing = function(xmlDoc,title, latlon, desc, sbid) {
       			// Shall we zoom to the bounds?
 		}
  	if (!that.opts.nozoom && !that.basesidebar) {
+			//alert("bounds "+that.bounds);
         	that.map.fitBounds(that.bounds);
       		}
     	}
@@ -4061,6 +4082,8 @@ if (overlaymanager.map.getZoom() > 1) {
 	}
  
 	var projection = overlaymanager.overlayview.getProjection();
+	 
+	if(projection) {
 	var tr = new google.maps.LatLng(bounds.getNorthEast().lat(),bounds.getNorthEast().lng());
 	var bl = new google.maps.LatLng(bounds.getSouthWest().lat(),bounds.getSouthWest().lng());
   // Convert the points to pixels and the extend out by the grid size.
@@ -4074,9 +4097,12 @@ if (overlaymanager.map.getZoom() > 1) {
  // Convert the pixel points back to LatLng
 	var ne = projection.fromDivPixelToLatLng(trPix);
 	var sw = projection.fromDivPixelToLatLng(blPix);
- // Extend the bounds to contain the new bounds.
 	bounds.extend(ne);
 	bounds.extend(sw);
+	}
+	
+ // Extend the bounds to contain the new bounds.
+
 	return bounds;
 };
 
@@ -4668,6 +4694,7 @@ GeoXml.prototype.DownloadURL = function (fpath,callback,title){
 				this.div_.style.position = "absolute";
                 var overlayProjection = this.getProjection();
                 var position = overlayProjection.fromLatLngToDivPixel(this.pos);
+			//	alert(this.pos);
 				this.div_.style.fontSize = this.style_.fontSize;
 				this.div_.style.fontFamily = this.style_.fontFamily;
                 div.style.left = position.x + 'px';
