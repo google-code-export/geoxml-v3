@@ -2335,7 +2335,7 @@ GeoXml.prototype.handlePlacemarkGeometry = function(mark, geom, idx, depth, full
         if (!name && title) { name = title; }
 
         if (fullstyle) {
-			alert("overriding style with" +fullstyle.url);
+			//console.log("overriding style with" +fullstyle.url);
             style = fullstyle;
 			}
 	  var iwheightstr;
