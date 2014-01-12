@@ -282,9 +282,7 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 			scale = instyle.scale;
 			}
 		var bicon;
-		 
-		
-		if (instyle.url == "" && this.showLabels){
+		if ((instyle && typeof instyle.url == "undefined") && this.showLabels){
 			if ((scale*12)< 7){
 				scale = 0.6;
 				}
@@ -314,6 +312,7 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 			} else {
 				this.overlayman.AddMarker(m, name, idx, parm, visible);
 				}
+			return;
 			}
 			
 		if(instyle){
@@ -369,8 +368,8 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 			icon.url = href;  
 			}
 	    else {
-	        href = "http://maps.google.com/mapfiles/kml/pal3/icon40";
-	        if (instyle == null || typeof instyle == "undefined") {
+	        if (instyle == null || instyle.url =="" || typeof instyle == "undefined") {
+				href = "http://maps.google.com/mapfiles/kml/pal3/icon40";
 	            shadow = href + "s.png";
 	            href += ".png";
 	            if (this.opts.baseicon) {
@@ -2293,7 +2292,6 @@ GeoXml.prototype.handlePlacemarkGeometry = function(mark, geom, idx, depth, full
                     box_count++; processme = true; break;
                 case "styleurl":
                     styleid = nv;
-					var currstyle = style;
 					style = that.styles[styleid];
                     break;
                 case "stylemap":
@@ -2338,9 +2336,11 @@ GeoXml.prototype.handlePlacemarkGeometry = function(mark, geom, idx, depth, full
         if (!name && title) { name = title; }
 
         if (fullstyle) {
-			//console.log("overriding style with" +fullstyle.url);
+			console.log("overriding style with" +fullstyle.url);
             style = fullstyle;
 			}
+			
+			
 	  var iwheightstr;
 		if (this.iwheight != 0){
 			iwheightstr = "height:"+this.iwheight+"px";
@@ -2406,7 +2406,7 @@ GeoXml.prototype.handlePlacemarkGeometry = function(mark, geom, idx, depth, full
 				if (path.length == 1 || path[1] == "") {
 						bits = path[0].split(",");
 						point = new google.maps.LatLng(parseFloat(bits[1]), parseFloat(bits[0]));
-					//	alert(point);
+						//alert(point + " "+style+" "+style.url);
 						this.overlayman.folderBounds[idx].extend(point);
 						// Does the user have their own createmarker function?
 						if (!skiprender) {
@@ -2606,21 +2606,24 @@ GeoXml.prototype.handleStyle = function(style,sid,currstyle){
       if (icons.length > 0) {
         href=this.getText(icons[0].getElementsByTagName("href")[0]);
 		if(!!!href){
-			href = currstyle.url;
+			if (currstyle){
+				href = currstyle.url;
+				}
 			}
-		var scale = parseFloat(this.getText(icons[0].getElementsByTagName("scale")[0]),10);
-		if(scale){
-			myscale = scale;
+		if (href) {
+			var scale = parseFloat(this.getText(icons[0].getElementsByTagName("scale")[0]),10);
+			if(scale){
+				myscale = scale;
+				}
+			var hs = icons[0].getElementsByTagName("hotSpot");
+			tempstyle = this.makeIcon(currstyle,href,myscale,hs[0]);
+			tempstyle.scale = myscale;
+			that.styles[strid] = tempstyle;
 			}
-		var hs = icons[0].getElementsByTagName("hotSpot");
-		tempstyle = this.makeIcon(currstyle,href,myscale,hs[0]);
-		tempstyle.scale = myscale;
-		that.styles[strid] = tempstyle;
       	}
 
 	  var labelstyles =style.getElementsByTagName("LabelStyle");
 	  if (labelstyles.length > 0){
-	  
 		var scale = parseFloat(this.getText(labelstyles[0].getElementsByTagName("scale")[0]),10);
 		color = this.getText(labelstyles[0].getElementsByTagName("color")[0]);
         aa = color.substr(0,2);
@@ -2635,6 +2638,7 @@ GeoXml.prototype.handleStyle = function(style,sid,currstyle){
         if (!!!that.styles[strid]) {
           that.styles[strid] = {};
 		  }
+		tempstyle = that.styles[strid];
         that.styles[strid].textColor = color;
 		if (scale == 0) {
 			scale = 1;
