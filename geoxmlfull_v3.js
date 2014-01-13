@@ -1556,7 +1556,7 @@ GeoXml.prototype.createPolygon = function(lines,color,width,opacity,fillcolor,fi
   p.obj.fill = fill;
   p.obj.outline = outline; 
   p.obj.fillcolor = fillcolor;
-  p.obj.strokecolor = color; 
+  p.obj.strokeColor = color; 
   p.obj.strokeOpacity = opacity;
   
   if(!color){p.obj.strokeColor = this.style.color;}
