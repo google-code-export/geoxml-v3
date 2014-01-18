@@ -2,8 +2,9 @@
 *  geoxml.js		                               by Lance Dyas              *
 *  A Google Maps API Extension  GeoXml parser                                 *
 *  GeoXml Parser based on my maps kml parser by Mike Williams called egeoxml  *
-*  Additions include:   GML/WFS/GeoRSS/GPX expanded GE KML style support      *                                          
-\******************************************************************************/
+*  Additions include:   GML/WFS/GeoRSS/GPX expanded GE KML style support      *     
+*  Expanded With: Tiled KML support (Dynamic KML Layer) from MicroImages	  *                                           
+******************************************************************************/
 // Constructor
 function KMLObj(title,desc,op,fid) {
 	this.title = title;
@@ -67,10 +68,6 @@ DynamicKMLLayer.prototype.toggleContents = function(i,show){
 	
 	//for(var z = this.minTileLevel;z<= this.maxTileLevel;z++){
 		if(this.geoxmls[z]){
-			if(tntLayerControlSizer){
-				var sb = document.getElementById("tntLayerControl");
-				sb.style.height = "";
-				}
 			for(var y in this.geoxmls[z]){
 				var col = this.geoxmls[z][y];
 				for(var x in this.geoxmls[z][y]){
@@ -85,11 +82,6 @@ DynamicKMLLayer.prototype.toggleContents = function(i,show){
 						}
 					}
 				}
-				
-			if(tntLayerControlSizer){
-				if(resizinglc){clearTimeout(resizinglc); }
-				resizinglc = setTimeout(function(){ tntLayerControlSizer(); },55);
-				}
 			}
 	//	}
 	};	
@@ -97,10 +89,6 @@ DynamicKMLLayer.prototype.toggleContents = function(i,show){
 DynamicKMLLayer.prototype.toggleFolder = function(i){
 	var z = this.tiledZoom;
 		if(this.geoxmls[z]){
-			if(tntLayerControlSizer){
-				var sb = document.getElementById("tntLayerControl");
-				sb.style.height = "";
-				}
 			var toggled = false;
 			for(var y in this.geoxmls[z]){
 				var col = this.geoxmls[z][y];
@@ -116,10 +104,6 @@ DynamicKMLLayer.prototype.toggleFolder = function(i){
 					}
 				if(toggled) { break; }
 				}
-			if(tntLayerControlSizer){
-				if(resizinglc){clearTimeout(resizinglc); }
-				resizinglc = setTimeout(function(){ tntLayerControlSizer(); },55);
-				}
 			}
 	};	
 	
@@ -130,19 +114,14 @@ DynamicKMLLayer.prototype.toggleAllNames = function(idx,show){
 	var folder = document.getElementById(idx);
 	var myvar = this.myvar;
 	if(folder){
-		if(tntLayerControlSizer){
-			var sb = document.getElementById("tntLayerControl");
-			sb.style.height = "";
-			}
+		
 		for(var n=0;n<folder.names.length; n++){
 			cb = Lance$(myvar+''+'CB'+escape(folder.names[n]));
-			cb.checked = show;
+			if (cb) {
+				cb.checked = show;
+				}
 			var name = folder.names[n];
 			this.showHideName(escape(name),show);
-			}
-		if(tntLayerControlSizer){
-			if(resizinglc){clearTimeout(resizinglc); }
-				resizinglc = setTimeout(function(){ tntLayerControlSizer(); },55);
 			}
 		}
 	else {return; }
@@ -172,10 +151,6 @@ DynamicKMLLayer.prototype.showHideName = function(name,show){
 
 	//for(var z = this.minTileLevel;z<= this.maxTileLevel;z++){
 		if(this.geoxmls[z]){
-			if(tntLayerControlSizer){
-				var sb = document.getElementById("tntLayerControl");
-				sb.style.height = "";
-				}
 			for(var y in this.geoxmls[z]){
 				var col = this.geoxmls[z][y];
 				for(var x in this.geoxmls[z][y]){
@@ -187,9 +162,6 @@ DynamicKMLLayer.prototype.showHideName = function(name,show){
 							}
 						}
 					}
-				}
-			if(tntLayerControlSizer){
-				setTimeout(function(){ tntLayerControlSizer(); },65);
 				}
 			}
 		//}
@@ -392,10 +364,6 @@ DynamicKMLLayer.prototype.hide = function(){
 			obj.checked = false;
 			}
 		}
-	if(tntLayerControlSizer){
-		var sb = document.getElementById("tntLayerControl");
-		sb.style.height = "";
-		}
 	if(this.allNames.length > 0){
 		for(var n =0;n< this.allNames.length;n++){
 			this.showHideName(this.allNames[n],false);
@@ -423,9 +391,6 @@ DynamicKMLLayer.prototype.hide = function(){
 				}
 			}
 		}
-	if(tntLayerControlSizer){
-			setTimeout(function(){ tntLayerControlSizer(); },65);
-			}	
 	};
 	
 DynamicKMLLayer.prototype.show = function(){
@@ -551,21 +516,37 @@ function GeoXml(myvar, map, url, opts) {
 	this.mb = new MessageBox(map,this,"mb",this.opts.messagebox);
 	this.map = map;
 	this.url = url;
+	
 	if (typeof url == "string") {
 		this.urls = [url];
 		} 
 	else {
 		this.urls = url;
-		}
+		} 
 		
+	this.rectangleLegend = false;
+	if (typeof opts.rectangleLegend) {
+		this.rectangleLegend = this.opts.rectangleLegend;
+		}
+ 
+	this.tileset = null;
 	if (opts.tileset){
 		this.tileset = opts.tileset;
 		}	
+		
+	this.onlyLegend = false;
+	if (typeof opts.onlylegend != "undefined" && opts.onlylegend == true){
+		this.onlyLegend = true;
+		}
+		
 	this.showUnique = true;
 	if (typeof opts.uniqueByName != "undefined" && opts.uniqueByName == false){
 		this.showUnique = false;
 		}
-	this.tilesetObj = eval(this.tileset);
+	if (this.tileset && typeof this.tileset!="undefined"){
+		this.tilesetObj = eval(this.tileset);
+		}
+ 
 	this.mb.style = this.opts.messagestyle || { backgroundColor: "silver"};
 	this.alwayspop = this.opts.alwaysinfopop || false;
 	this.quiet = this.opts.quiet || false;
@@ -944,10 +925,54 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 	    var href;
 		var scale = 1;
 		
+		
 		if(instyle && instyle.scale){
 			scale = instyle.scale;
 			}
 	
+		if (instyle && typeof instyle.url == "undefined"){
+		
+			if ((scale*12)< 7){
+				scale = 0.6;
+				}
+			var fs = (12*scale)+"px";
+			 
+			var style = { fontSize: fs, fontFamily: "Verdana, Arial, Sans-serif" };
+			if (instyle && instyle.textColor){
+				style.color = instyle.textColor;
+				}
+            var m = new GeoXml.Label(point,name,"",this.map, style);
+			m.title = name;
+			m.id = kml_id;
+			var obj = { "type": "label", "title": name, "description": name, "href": href, "shadow": shadow, "visibility": visible, "x": point.x, "y": point.y, "id": m.id };
+			this.kml[idx].marks.push(obj);
+			var parm;
+			 
+			//var blob = '<span style="border-left:' + this.sidebariconheight + "px solid " + style.color + ';">&nbsp;</span>';
+			var blob = '<svg xmlns="http://www.w3.org/2000/svg" style="margin-left:0px;margin-top:0px" version="1.2" width="16px" height="16px">';
+			blob += '<text stroke="#bfb3b3" transform="matrix(0.757796 0 0 0.757796 0.200575 4.77596)" xml:space="preserve" text-anchor="middle" font-family="serif" font-size="24" id="svg_15" y="12.958634" x="7.370384" stroke-linecap="null" stroke-linejoin="null" stroke-dasharray="null" stroke-width="0" fill="'+ style.color +'">A</text>';
+			blob += '<text stroke="#bfb3b3" transform="matrix(0.781022 0 0 0.781022 2.09056 3.86291)" xml:space="preserve" text-anchor="middle" font-family="serif" font-size="24" id="svg_16" y="8.571944" x="13.233881" stroke-linecap="null" stroke-linejoin="null" stroke-dasharray="null" stroke-width="0" fill="'+style.color+'">a</text>';
+			blob += '</svg>';
+			
+			var desc2="";
+			if(this.tileset){
+				parm = this.tileset + "$$$" + name + "$$$label$$$" + n + "$$$" + blob + "$$$" + visible + "$$$null$$$" + desc2;
+				m.sidebarid = this.tileset + "sb" + n;
+				}
+			else {
+				parm = this.myvar + "$$$" + name + "$$$label$$$" + n + "$$$" + blob + "$$$" + visible + "$$$null$$$" + desc2;
+				m.sidebarid = this.myvar + "sb" + n;
+				}
+			if (!!this.opts.addmarker) {
+				this.opts.addmarker(m, name, idx, parm, visible);
+			} else {
+				this.overlayman.AddMarker(m, name, idx, parm, visible);
+				}
+		
+		//	if(console) { console.log(point + " "+name); }
+			return;
+			}
+			
 		var bicon;
 		if(instyle){
 			bicon = instyle;
@@ -1188,8 +1213,8 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 	    } else {
 	        html1 = html;
 	    }
-  	if(this.opts.markerfollowlinks){
-		if(markerurl && typeof markerurl=="string"){
+  
+		if(this.opts.markerfollowlinks && markerurl && typeof markerurl=="string" && markerurl !=""){
 			if(markerurl!=''){
 				m.url = markerurl;
 	    	  		google.maps.event.addListener(m, "click", function() {
@@ -1203,7 +1228,7 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 	        	});
 		   }
 	    	}
-	    }
+
 	    else {
 	    if (this.clickablemarkers) {
 			var geoxml = this;
@@ -1218,24 +1243,25 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 			var parserOptions = this.opts;
 			
     // Infowindow-opening event handler
-		google.maps.event.addListener(m, 'click', function() {
-			if (!!geoxml.singleInfoWindow) {
-				if(geoxml.tilesetObj){
-				if (!!geoxml.tilesetObj.lastMarker && !!geoxml.tilsetObj.lastMarker.infoWindow) {
-						geoxml.tilesetObj.lastMarker.infoWindow.close();
+			google.maps.event.addListener(m, 'click', function() {
+				m.infoWindow.setPosition(point);
+				m.infoWindow.open(this.map, this);
+				if (!!geoxml.singleInfoWindow) {
+					var ts = geoxml.tilesetObj;
+					if(ts && typeof ts != "undefined"){
+						if (!!ts.lastMarker && !!ts.lastMarker.infoWindow) {
+							ts.lastMarker.infoWindow.close();
+							}
+						ts.lastMarker = m;
 						}
-					geoxml.tilesetObj.lastMarker = m;
-					}
-				else {
-					if (!!geoxml.lastMarker && !!geoxml.lastMarker.infoWindow) {
-						geoxml.lastMarker.infoWindow.close();
+					else {
+						if (!!geoxml.lastMarker && !!geoxml.lastMarker.infoWindow) {
+							geoxml.lastMarker.infoWindow.close();
+							}
+						geoxml.lastMarker = m;
 						}
-					geoxml.lastMarker = m;
 					}
-				}
-			this.infoWindow.open(this.map, this);
-			});
-	
+				});
 			}
 	    }
 	    if (this.opts.domouseover) {
@@ -1361,20 +1387,39 @@ GeoXml.prototype.processLine = function (pnum, lnum, idx){
 			}
 		}
 	var html = "<div style='font-weight: bold; font-size: medium; margin-bottom: 0em;'>"+op.name+"</div>";
-	if (desc != op.name){
-		if (awidth){
-			html += "<div style='font-family: Arial, sans-serif;font-size: small;max-width:"+awidth+"px;'>"+desc+"</div>";
-			}
-		else {
-			html += "<div style='font-family: Arial, sans-serif;font-size: small;'>"+desc+"</div>";
+	if (desc && typeof desc !="undefined"){
+		if (desc != op.name){
+			if (awidth){
+				html += "<div style='font-family: Arial, sans-serif;font-size: small;max-width:"+awidth+"px;'>"+desc+"</div>";
+				}
+			else {
+				html += "<div style='font-family: Arial, sans-serif;font-size: small;'>"+desc+"</div>";
+				}
 			}
 		}
-
 	if(lnum == 0){
 	 	if(this.opts.sidebarid) {
-    			var blob = '&nbsp;&nbsp;<span style=";border-left:'+op.width+'px solid '+op.color+';">&nbsp;</span> ';
-				
-			if(this.sidebarsnippet){
+			var s_w = op.width;
+			if (s_w <= 2) {s_w = 2; } 
+			if (s_w >16) {s_w = 16; };
+		 
+		var blob;
+		if (this.rectangleLegend){
+			var m_w = parseInt(((16 - s_w)/2));
+			blob = '<svg xmlns="http://www.w3.org/2000/svg" style="margin-left:0px;margin-top:0px" version="1.2" fill="#ffeecc" width="16px" height="16px">';
+			if (op.color=='#ffffff' || op.color=='#FFFFFF'){
+				blob += ' <rect stroke="none" height="16" width="16" y="0" x="0" stroke-width="null" fill="#cbcbcb"/>';
+				}
+			blob += ' <rect stroke="none" height="16" width="'+s_w+'" y="0" x="'+m_w+'" stroke-width="null" fill="'+op.color+'"/></svg>';
+			}
+		else {
+			blob = '<svg xmlns="http://www.w3.org/2000/svg" style="margin-left:0px;margin-top:0px" version="1.2" fill="#ffeecc" width="16px" height="16px">';
+			if (op.color=='#ffffff' || op.color=='#FFFFFF'){
+				blob += ' <rect stroke="none" height="16" width="16" y="0" x="0" stroke-width="null" fill="#cbcbcb"/>';
+				}
+			blob += '<path stroke="'+op.color+'" d="m1.514515,10.908736c-0.457545,0.489079 0.473927,-7.091639 5.261762,-7.336174c4.787838,-0.244535 -0.457535,7.825252 4.804223,2.445392c5.261755,-5.37986 1.949991,11.609838 2.287748,3.179009"  stroke-width="2" fill="none"/></svg>';
+			}
+		if(this.sidebarsnippet){
 				var desc2 = GeoXml.stripHTML(desc);
 				desc2 = desc2.substring(0,20);
 				}
@@ -1506,8 +1551,8 @@ GeoXml.prototype.processLine = function (pnum, lnum, idx){
 			if(this.geoxml.clickablelines||doit){ 
 				if(this.geoxml.singleInfoWindow){
 					if (this.geoxml.tilesetObj){
-						if(!!this.geoxmlObj.tileset.lastMarker && !!his.geoxmlObj.tileset.lastMarker.infoWindow){
-							this.geoxmlObj.tileset.lastMarker.infoWindow.close();
+						if(!!this.geoxml.tilesetObj.lastMarker && !!this.geoxml.tilesetObj.lastMarker.infoWindow){
+							this.geoxml.tilesetObj.lastMarker.infoWindow.close();
 							}
 						this.geoxml.tilesetObj.lastMarker = p;
 						}
@@ -1817,8 +1862,16 @@ if(this.opts.polylabelclass && newgeom ) {
  
   if (this.basesidebar &&  newgeom) { 
     var folderid = this.myvar+"_folder"+idx;
-    var blob = "<span style=\"background-color:" + op.color + ";border:2px solid "+p.strokeColor+";\">&nbsp;&nbsp;&nbsp;&nbsp;</span> ";
-    if(this.sidebarsnippet){
+	var blob;
+	if (this.rectangleLegend){ 
+		blob = '<svg xmlns="http://www.w3.org/2000/svg" style="margin-left:0px;margin-top:0px" version="1.2" width="16px" height="16px">';
+		blob += ' <rect stroke="none" height="16" width="16" y="0" x="0" stroke-width="null" fill="'+op.color+'"/></svg>';
+		}
+	else {
+		blob = '<svg xmlns="http://www.w3.org/2000/svg" style="margin-left:0px;margin-top:0px" version="1.2" width="16px" height="16px">';
+		blob += '<path stroke="'+op.strokeColor+'" transform="rotate(139.901 9.70429 10.2675)" fill="'+op.color+'" stroke-dasharray="null" stroke-linejoin="null" stroke-linecap="null" d="m2.72366,9.83336c3.74686,-4.221 6.00924,-2.11097 7.43079,1.52863c1.42154,3.63961 3.85727,-1.60143 6.07385,1.67422c2.21659,3.27565 -4.2,6.26012 -7.17232,7.93434" id="svg_2"/></svg>';
+		}
+   if(this.sidebarsnippet){
 		var desc2 = GeoXml.stripHTML(desc);
 		desc2 = desc2.substring(0,20);}
 	else {desc2 = '';}
@@ -1972,7 +2025,19 @@ GeoXml.prototype.finishLineJSON = function(po, idx, lastlinename){
 		}
 
 	if(that.basesidebar && lineisnew) {
-    		var blob = '&nbsp;&nbsp;<span style=";border-left:'+po.weight+'px solid '+po.color+';">&nbsp;</span> ';
+    	var blob;
+		if (this.rectangleLegend){
+			var m_w = parseInt(((16 - s_w)/2));
+			blob = '<svg xmlns="http://www.w3.org/2000/svg" style="margin-left:0px;margin-top:0px" version="1.2" width="16px" height="16px">';
+			blob += ' <rect stroke="none" height="16" width="'+s_w+'" y="0" x="'+m_w+'" stroke-width="null" fill="'+op.color+'"/></svg>';
+			}
+		else {
+			blob = '<svg xmlns="http://www.w3.org/2000/svg" style="margin-left:0px;margin-top:0px" version="1.2" width="16px" height="16px">';
+			if (op.color=='#ffffff' || op.color=='#FFFFFF'){
+				blob += ' <rect stroke="none" height="16" width="16" y="0" x="0" stroke-width="null" fill="#cbcbcb"/>';
+				}
+			blob += '<path stroke="'+op.color+'" d="m1.514515,10.908736c-0.457545,0.489079 0.473927,-7.091639 5.261762,-7.336174c4.787838,-0.244535 -0.457535,7.825252 4.804223,2.445392c5.261755,-5.37986 1.949991,11.609838 2.287748,3.179009"  stroke-width="2" fill="none"/></svg>';
+			}
 		if(typeof po.visibility == "undefined"){ po.visibility = true; }
 			if(this.sidebarsnippet){
 				var desc2 = GeoXml.stripHTML(desc);
@@ -2219,13 +2284,21 @@ GeoXml.prototype.toggleFolder = function(i){
 	var fid = myvar+"_folder"+i;
 	var f = Lance$(fid); 
 	//var tb = Lance$(this.myvar+"TB"+i);
+	
+	var sb = document.getElementById("sideBar");
+	if (sb) {}
+	else {
+		if(tntLayerControlSizer){
+			if(f.style.display != "none"){
+				var tlc=document.getElementById("tntLayerControl");
+				tlc.style.height="";
+				}
+			}
+		}
+	
 	fid = this.myvar+"FB"+i;
 	var folderimg = Lance$(fid);
 	if(f){	
-		if(tntLayerControlSizer){
-			var sb = document.getElementById("tntLayerControl");
-			sb.style.height = "";
-			}
 		if(f.style.display=="none"){
 			f.style.display = "";
 			if(folderimg){
@@ -2248,14 +2321,17 @@ GeoXml.prototype.toggleFolder = function(i){
 						}
 				}
 			}
-			
-		if(tntLayerControlSizer){
-			if(resizinglc){clearTimeout(resizinglc); }
-			resizinglc = setTimeout(function(){ tntLayerControlSizer(); },550);
-			}
 			 
 			return true;
 		}
+		
+		if (sb) {}
+		else {
+			if(tntLayerControlSizer){
+				if(resizinglc){clearTimeout(resizinglc); }
+				resizinglc = setTimeout(function(){ tntLayerControlSizer(); },55);
+				}
+			}
 		return false;
 	};
 	
@@ -2271,10 +2347,6 @@ GeoXml.prototype.toggleFolders = function(){
 	var f = Lance$(fid); 
 	fid = this.myvar+"FB";
 	var folderimg = Lance$(fid);
-	if(tntLayerControlSizer){
-		var sb = document.getElementById("tntLayerControl");
-		sb.style.height = "";
-		}
 	if(f.style.display == "none"){
 			f.style.display = "";
 			if(folderimg) {
@@ -2301,11 +2373,18 @@ GeoXml.prototype.toggleFolders = function(){
 		this.forcefoldersclosed = true;
 		this.forcefoldersopen = false;
 		}
-
-	if(tntLayerControlSizer){
-		if(resizinglc){clearTimeout(resizinglc); }
-		resizinglc = setTimeout(function(){ tntLayerControlSizer(); },55);
+	 var sb = document.getElementById("tntSidebar");
+	 if (sb) {
+	  } else {
+		if (tntLayerControlSizer) {
+		  if (resizinglc) {
+			clearTimeout(resizinglc);
+		  }
+		  resizinglc = setTimeout(function() {
+			tntLayerControlSizer();
+		  }, 55);
 		}
+	  }
 	};	
 	
 DynamicKMLLayer.prototype.toggleFolders = function(){
@@ -2314,10 +2393,6 @@ DynamicKMLLayer.prototype.toggleFolders = function(){
 	//var tb = Lance$(this.myvar+"TB"+i);
 	fid = this.myvar+"FB";
 	var folderimg = Lance$(fid);
-	if(tntLayerControlSizer){
-		var sb = document.getElementById("tntLayerControl");
-		sb.style.height = "";
-		}
 	if(f.style.display == "none"){
 			f.style.display = "";
 			if(folderimg.src == this.folderclosedicon){
@@ -2340,11 +2415,18 @@ DynamicKMLLayer.prototype.toggleFolders = function(){
 		this.forcefoldersclosed = true;
 		this.forcefoldersopen = false;
 		}
-
-	if(tntLayerControlSizer){
-		if(resizinglc){clearTimeout(resizinglc); }
-		resizinglc = setTimeout(function(){ tntLayerControlSizer(); },55);
+	 var sb = document.getElementById("tntSidebar");
+	 if (sb) {
+	  } else {
+		if (tntLayerControlSizer) {
+		  if (resizinglc) {
+			clearTimeout(resizinglc);
+		  }
+		  resizinglc = setTimeout(function() {
+			tntLayerControlSizer();
+		  }, 55);
 		}
+	  }
 	};
 		
 GeoXml.prototype.saveJSON = function(){
@@ -2560,14 +2642,16 @@ GeoXml.prototype.showHide = function(a,show, p){ // if a is not defined then p w
 GeoXml.prototype.toggleNamedHilite = function(name){ // if a is not defined then p will be.
 	for(var m = 0;m< this.overlayman.markers.length; m++){
 		var marker = this.overlayman.markers[m];
-		if (marker.idx == name){
-			if (marker.lit) {
-				marker.onOut(null,true);
-				marker.lit = false;
-				}
-			else {
-				marker.onOver(null,true);
-				marker.lit = true;
+		if (marker.onOver){
+			if (marker.idx == name){
+				if (marker.lit) {
+					marker.onOut(null,true);
+					marker.lit = false;
+					}
+				else {
+					marker.onOver(null,true);
+					marker.lit = true;
+					}
 				}
 			}
 		}
@@ -2683,25 +2767,49 @@ GeoXml.prototype.addSidebar = function(myvar, name, type, e, graphic, ckd, i, sn
 		snippet = "";
 		}
 	if(this.showUnique || this.tileset) {
-		switch(type) {
-		//onmouseout="' + myvar+ '.onOutName(\''+escape(name)+'\');" 
-			case  "marker" :  h = '<li id="'+mid+'" onmouseover="' + myvar+ '.onOverName(\''+escape(name)+'\');" ><input id="'+myvar+'CB'+escape(name)+'" type="checkbox" style="vertical-align:middle" '+check+' onclick="'+myvar+'.showHideName(\''+escape(name)+'\',this.checked)"><a href="#" onclick="return false;">'+ graphic + truename + '</a>'+snippet+'</li>';
-			break;
+		if (this.onlyLegend) {
+			switch(type) {
+				case  "marker" :  h = '<li id="'+mid+'" onmouseover="' + myvar+ '.onOverName(\''+escape(name)+'\');" >'+ graphic +'&nbsp;'+ truename + '</a>'+snippet+'</li>';
+				break;
+				case "label": 
+				h = '<li id="'+mid+'" ><span style="margin-top:6px;"><a href="#" onclick="'+myvar+ '.toggleNamedHilite(\''+escape(name)+'\');return false;">&nbsp;<div></div>' + graphic +'&nbsp;'+ truename + '</a></span></nobr>'+snippet+'</li>';
 			//onmouseout="' + myvar+ '.onOutName(\''+escape(name)+'\');" onmouseover="' myvar+ '.onOverName(\''+escape(name)+'
-			case  "polyline" :  h = '<li id="'+mid+'"><input id="'+myvar+'CB'+escape(name)+'" type="checkbox" '+check+' onclick="'+myvar+'.showHideName(\''+escape(name)+'\',this.checked)"><span style="margin-top:6px;"><a href="#" onclick="'+myvar+ '.toggleNamedHilite(\''+escape(name)+'\');return false;">&nbsp;' + graphic + truename + '</a></span>'+snippet+'</li>';
-			break;
+				break;
+				case  "polyline" :  h = '<li id="'+mid+'"><span style="margin-top:6px;"><a href="#" onclick="'+myvar+ '.toggleNamedHilite(\''+escape(name)+'\');return false;">' + graphic +'&nbsp;'+ truename + '</a></span>'+snippet+'</li>';
+				break;
+				case "polygon": h = '<li id="'+mid+'" ><span style="margin-top:6px;"><a href="#" onclick="'+myvar+ '.toggleNamedHilite(\''+escape(name)+'\');return false;">' + graphic +'&nbsp;'+ truename + '</a></span></nobr>'+snippet+'</li>';
+				break;
+				case "groundoverlay": h = '<li id="'+mid+'"><span style="margin-top:6px;"><a href="#" onclick="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'zoomto\');return false;">' + graphic +'&nbsp;'+ truename + '</a></span>'+snippet+'</li>';
+				break;
+				case "tiledoverlay": h = '<li id="'+mid+'"><nobr><span style="margin-top:6px;"><a href="#" oncontextMenu="'+myvar+'.upgradeLayer('+i+');return false;" onclick="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'zoomto\');return false;">'+GeoXml.WMSICON +'&nbsp;'+ truename + '</a><br />'+ graphic +'</span>'+snippet+'</li>';
+				break;
+				}
+			}
+		else {
+			switch(type) {
 			//onmouseout="' + myvar+ '.onOutName(\''+escape(name)+'\');" 
-			case "polygon": h = '<li id="'+mid+'" ><input id="'+myvar+'CB'+escape(name)+'" type="checkbox" '+check+' onclick="'+myvar+'.showHideName(\''+escape(name)+'\',this.checked)" /><span style="margin-top:6px;"><a href="#" onclick="'+myvar+ '.toggleNamedHilite(\''+escape(name)+'\');return false;">&nbsp;' + graphic + truename + '</a></span></nobr>'+snippet+'</li>';
-			break;
-			case "groundoverlay": h = '<li id="'+mid+'"><input id="'+myvar+''+e+'CB" type="checkbox" '+check+' onclick="'+myvar+'.showHideName(\''+escape(name)+'\',this.checked)"><span style="margin-top:6px;"><a href="#" onclick="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'zoomto\');return false;">&nbsp;' + graphic + truename + '</a></span>'+snippet+'</li>';
-			break;
-			case "tiledoverlay": h = '<li id="'+mid+'"><nobr><input id="'+myvar+''+e+'CB" type="checkbox" '+check+' onclick="'+myvar+'.toggleOff('+e+',this.checked)"><span style="margin-top:6px;"><a href="#" oncontextMenu="'+myvar+'.upgradeLayer('+i+');return false;" onclick="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'zoomto\');return false;">'+GeoXml.WMSICON +'&nbsp;'+ truename + '</a><br />'+ graphic +'</span>'+snippet+'</li>';
-			break;
+				case  "marker" :  h = '<li id="'+mid+'" onmouseover="' + myvar+ '.onOverName(\''+escape(name)+'\');" ><input id="'+myvar+'CB'+escape(name)+'" type="checkbox" style="vertical-align:middle" '+check+' onclick="'+myvar+'.showHideName(\''+escape(name)+'\',this.checked)"><a href="#" onclick="return false;">'+ graphic +'&nbsp;'+ truename + '</a>'+snippet+'</li>';
+				break;
+				case "label": h = '<li id="'+mid+'" ><input id="'+myvar+'CB'+escape(name)+'" type="checkbox" '+check+' onclick="'+myvar+'.showHideName(\''+escape(name)+'\',this.checked)" /><span style="margin-top:6px;"><a href="#" onclick="'+myvar+ '.toggleNamedHilite(\''+escape(name)+'\');return false;">' + graphic +'&nbsp;'+ truename + '</a></span></nobr>'+snippet+'</li>';
+			//onmouseout="' + myvar+ '.onOutName(\''+escape(name)+'\');" onmouseover="' myvar+ '.onOverName(\''+escape(name)+'
+				break;
+				case  "polyline" :  h = '<li id="'+mid+'"><input id="'+myvar+'CB'+escape(name)+'" type="checkbox" '+check+' onclick="'+myvar+'.showHideName(\''+escape(name)+'\',this.checked)"><span style="margin-top:6px;"><a href="#" onclick="'+myvar+ '.toggleNamedHilite(\''+escape(name)+'\');return false;">' + graphic +'&nbsp;'+ truename + '</a></span>'+snippet+'</li>';
+				break;
+				//onmouseout="' + myvar+ '.onOutName(\''+escape(name)+'\');" 
+				case "polygon": h = '<li id="'+mid+'" ><input id="'+myvar+'CB'+escape(name)+'" type="checkbox" '+check+' onclick="'+myvar+'.showHideName(\''+escape(name)+'\',this.checked)" /><span style="margin-top:6px;"><a href="#" onclick="'+myvar+ '.toggleNamedHilite(\''+escape(name)+'\');return false;">' + graphic +'&nbsp;'+ truename + '</a></span></nobr>'+snippet+'</li>';
+				break;
+				case "groundoverlay": h = '<li id="'+mid+'"><input id="'+myvar+''+e+'CB" type="checkbox" '+check+' onclick="'+myvar+'.showHideName(\''+escape(name)+'\',this.checked)"><span style="margin-top:6px;"><a href="#" onclick="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'zoomto\');return false;">' + graphic +'&nbsp;'+ truename + '</a></span>'+snippet+'</li>';
+				break;
+				case "tiledoverlay": h = '<li id="'+mid+'"><nobr><input id="'+myvar+''+e+'CB" type="checkbox" '+check+' onclick="'+myvar+'.toggleOff('+e+',this.checked)"><span style="margin-top:6px;"><a href="#" oncontextMenu="'+myvar+'.upgradeLayer('+i+');return false;" onclick="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'zoomto\');return false;">'+GeoXml.WMSICON +'&nbsp;'+ truename + '</a><br />'+ graphic +'&nbsp;'+'</span>'+snippet+'</li>';
+				break;
+				}
 			}
 		}
 	else {
-		switch(type) { //(a,show, p)
-			case  "marker" :  h = '<li id="'+mid+'" onmouseover="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'mouseover\');return false;" ><input id="'+myvar+e+'CB" type="checkbox" style="vertical-align:middle" '+check+' onclick="'+myvar+'.showHide('+e+',this.checked)"><a href="#" onclick="return false;">'+ graphic + truename + '</a>'+snippet+'</li>';
+		switch(type) { //not tested recently
+				case  "marker" :  h = '<li id="'+mid+'" onmouseover="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'mouseover\');return false;" ><input id="'+myvar+e+'CB" type="checkbox" style="vertical-align:middle" '+check+' onclick="'+myvar+'.showHide('+e+',this.checked)"><a href="#" onclick="return false;">'+ graphic + truename + '</a>'+snippet+'</li>';
+				break;
+				case  "label" :  h = '<li id="'+mid+'" onmouseover="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'mouseover\');return false;" ><input id="'+myvar+e+'CB" type="checkbox" style="vertical-align:middle" '+check+' onclick="'+myvar+'.showHide('+e+',this.checked)"><a href="#" onclick="return false;">'+ graphic + truename + '</a>'+snippet+'</li>';
 				break;
 				case  "polyline" :  h = '<li id="'+mid+'"><input id="'+myvar+e+'CB" type="checkbox" '+check+' onclick="'+myvar+'.showHide(\''+e+'\',this.checked,'+i+')"><span style="margin-top:6px;"><a href="#" onclick="'+myvar+ '.toggleNamedHilite(\''+escape(name)+'\');return false;">&nbsp;' + graphic + truename + '</a></span>'+snippet+'</li>';
 				break;
@@ -3667,7 +3775,7 @@ GeoXml.prototype.makeIcon = function(currstyle, href, myscale, hotspot){
 			//	alert("we have "+bicon.size.height +"  and "+bicon.size.width+" "+w+","+h+" "+scale);
 				tempstyle.scaledSize = new google.maps.Size(w,h);
 				}
-			//alert(" size:"+tempstyle.size+" - anchor:"+tempstyle.anchor+" - scaled:"+tempstyle.scaledSize+" - origin:"+tempstyle.orgin);
+			//alert(" size:"+tempstyle.size+" - anchor:"+tempstyle.anchor+" - scaled:"+tempstyle.scaledSize+" - origin:"+tempstyle.origin);
 		   tempstyle.url = href;
 		  } else {
 			tempstyle = new google.maps.MarkerImage(href,new google.maps.Size(32,32),new google.maps.Point(0,0),new google.maps.Point(32*scale*anchorscale.x,32*scale*anchorscale.y),new google.maps.Size(32*scale,32*scale));
@@ -3732,16 +3840,41 @@ GeoXml.prototype.handleStyle = function(style,sid,currstyle){
 		if(!!!href && typeof currstyle != "undefined"){
 			href = currstyle.url;
 			}
-		var scale = parseFloat(this.getText(icons[0].getElementsByTagName("scale")[0]),10);
-		if(scale){
-			myscale = scale;
+		if (href){
+			var scale = parseFloat(this.getText(icons[0].getElementsByTagName("scale")[0]),10);
+			if(scale){
+				myscale = scale;
+				}
+			var hs = icons[0].getElementsByTagName("hotSpot");
+			tempstyle = this.makeIcon(currstyle,href,myscale,hs[0]);
+			tempstyle.scale = myscale;
+			that.styles[strid] = tempstyle;
 			}
-		var hs = icons[0].getElementsByTagName("hotSpot");
-		tempstyle = this.makeIcon(currstyle,href,myscale,hs[0]);
-		tempstyle.scale = myscale;
-		that.styles[strid] = tempstyle;
       	}
-		
+	  var labelstyles =style.getElementsByTagName("LabelStyle");
+	  if (labelstyles.length > 0){
+	  
+		var scale = parseFloat(this.getText(labelstyles[0].getElementsByTagName("scale")[0]),10);
+		color = this.getText(labelstyles[0].getElementsByTagName("color")[0]);
+        aa = color.substr(0,2);
+        bb = color.substr(2,2);
+        gg = color.substr(4,2);
+        rr = color.substr(6,2);
+        color = "#" + rr + gg + bb;
+        opacity = parseInt(aa,16)/256;
+		if(that.opts.overrideOpacity){
+			opacity = that.opts.overrideOpacity;
+			}
+        if (!!!that.styles[strid]) {
+          that.styles[strid] = {};
+		  }
+        that.styles[strid].textColor = color;
+		if (scale == 0) {
+			scale = 1;
+			}
+        that.styles[strid].scale = scale;
+		tempstyle = that.styles[strid];
+		}
       // is it a LineStyle ?
       var linestyles=style.getElementsByTagName("LineStyle");
       if (linestyles.length > 0) {
@@ -3948,7 +4081,7 @@ GeoXml.prototype.processKML = function(node, marks, title, sbid, depth, paren) {
 
 	var idx = this.overlayman.folders.length;
 	var me = paren;
-	if(sf.length >1 || pm.length || ground || makewms ){
+	if (sf.length >1 || pm.length || ground || makewms ){
         this.overlayman.folders.push([]);
 		this.overlayman.subfolders.push([]);
     	this.overlayman.folderhtml.push([]);
@@ -4015,13 +4148,12 @@ GeoXml.prototype.processKML = function(node, marks, title, sbid, depth, paren) {
 	
 	if(ground){
 		if (this.basesidebar) {
-    			var n = this.overlayman.markers.length;
-    			var blob = '<span style="background-color:black;border:2px solid brown;">&nbsp;&nbsp;&nbsp;&nbsp;</span> ';
+    		var n = this.overlayman.markers.length;
+    		var blob = '<span style="background-color:black;border:2px solid brown;">&nbsp;&nbsp;&nbsp;&nbsp;</span> ';
 			if(this.sidebarsnippet && snippet==""){
-				snippet = GeoXml.stripHTML(desc);
-				desc2 = desc2.substring(0,40);}
+			snippet = GeoXml.stripHTML(desc);
+			desc2 = desc2.substring(0,40);}
    			parm =  this.myvar+"$$$" +title + "$$$polygon$$$" + n +"$$$" + blob + "$$$" +visible+"$$$null$$$"+snippet; 
-   		 
 			var html = desc;
 			var thismap = this.map;
 			google.maps.event.addListener(ground,"zoomto", function() { 
@@ -4428,8 +4560,9 @@ GeoXml.prototype.createFolder = function(idx, title, sbid, icon, desc, snippet, 
 			desc = title;
 			}
 		desc = escape(desc);
-		var htm = '<ul>';
+		var htm = "";// = '<ul>';
 		if (!!!this.suppressfolders) {
+			//htm = '';
 			htm += '<input type="checkbox" id="'+myvar+''+idx+'FCB" style="vertical-align:middle" ';
 			htm += checked;
 			//htm += 'onclick="'+myvar+'.toggleContents('+idx+',this.checked)">';
@@ -4438,8 +4571,17 @@ GeoXml.prototype.createFolder = function(idx, title, sbid, icon, desc, snippet, 
 			htm += '<img id=\"'+myvar+'FB'+idx+'\" style=\"vertical-align:text-top;padding:0;margin:0\" height=\"'+this.sidebariconheight+'\" border=\"0\" src="'+icon+'" /></span>&nbsp;';
 			htm += '<a href="#" onclick="'+myvar+'.toggleFolder('+idx+')">';
 			htm +=	title + '</a>';
+			htm += '<ul><div id=\"'+folderid+'\" style="'+disp+'"></div></ul>'; //;
 			}
-		htm += '<div id=\"'+folderid+'\" style="'+disp+'"></div></ul>';
+		else {
+			if (folderid == (this.basesidebar+"1")){
+				htm = "<ul><span id='"+this.basesidebar+"_labels'></span>";
+				}
+		 	htm += '<div id=\"'+folderid+'\" style="'+disp+'"></div>'; 
+			if (folderid == (this.basesidebar + "1")){
+				htm += "</ul>";
+				}
+			}
 		
 		/*
 		var htm = '<ul><input type="checkbox" id="'+myvar+''+idx+'FCB" style="vertical-align:middle" ';
@@ -4450,7 +4592,6 @@ GeoXml.prototype.createFolder = function(idx, title, sbid, icon, desc, snippet, 
 		htm += '<img id=\"'+myvar+'FB'+idx+'\" style=\"vertical-align:text-top;padding:0;margin:0\" height=\"'+this.sidebariconheight+'\" border=\"0\" src="'+icon+'" /></span>&nbsp;';
 		htm += '<a href="#" onclick="'+myvar+'.toggleFolder('+idx+')">' + title + '</a><br><div id=\"'+folderid+'\" style="'+disp+'"></div></ul>';
 		*/
-		
 		
 		if(sb){ sb.innerHTML = sb.innerHTML + htm; }
 		if(this.tilesetObj){
@@ -4585,6 +4726,7 @@ GeoXml.prototype.processGML = function(root,title, latlon, desc, me) {
         this.overlayman.folders.push([]);
         this.overlayman.folderhtml.push([]);
 	    this.overlayman.folderhtmlast.push(0);
+		
 	    this.overlayman.folderBounds.push(new google.maps.LatLngBounds());
 	    var idx = this.overlayman.folders.length-1;
 	    if(this.basesidebar) {
@@ -5283,18 +5425,7 @@ OverlayManager.PopUp = function ( group )
 	}
     html += '</table>';
    // overlaymanager.map.closeInfoWindow(); close Last Marker
-    if (this.paren.singleInfoWindow) {
-		if(this.paren.tilesetObj){ 
-			if(!!this.paren.tilesetObj.lastMarker && !!this.paren.tilesetObj.lastMarker.infoWindow){
-				this.paren.tilesetObj.lastMarker.infoWindow.close();
-				}
-			}
-		else {
-			if(!!this.paren.lastMarker && !!this.paren.lastMarker.infoWindow){
-				this.paren.lastMarker.infoWindow.close();
-				}
-			}
-		}
+   
 	var infoWindowOptions = { 
 				content: html,
 				pixelOffset: new google.maps.Size(0, 2),
@@ -5314,6 +5445,18 @@ OverlayManager.PopUp = function ( group )
 		this.paren.lastMarker.infoWindow.open(this.paren.map);
 		}
     overlaymanager.poppedUpCluster = group;
+	if (this.paren.singleInfoWindow) {
+		if(this.paren.tilesetObj){ 
+			if(!!this.paren.tilesetObj.lastMarker && !!this.paren.tilesetObj.lastMarker.infoWindow){
+				this.paren.tilesetObj.lastMarker.infoWindow.close();
+				}
+			}
+		else {
+			if(!!this.paren.lastMarker && !!this.paren.lastMarker.infoWindow){
+				this.paren.lastMarker.infoWindow.close();
+				}
+			}
+		}
     };
 
 
@@ -5888,3 +6031,89 @@ GeoXml.prototype.DownloadURL = function (fpath,callback,title){
         }
 
 };
+          GeoXml.Label = function(pos, txt, cls, map, style){
+                this.pos = pos;
+                this.txt_ = txt;
+                this.cls_ = cls;
+                this.map_ = map;
+				this.style_ = style;
+                this.div_ = null;
+
+                // Explicitly call setMap() on this overlay
+                this.setMap(map);
+            }
+
+            GeoXml.Label.prototype = new google.maps.OverlayView();
+
+            GeoXml.Label.prototype.onAdd = function(){
+	
+                var div = document.createElement('DIV');
+           
+                div.innerHTML = this.txt_;
+
+                // Set the overlay's div_ property to this DIV
+                this.div_ = div;
+				this.div_.style.position = "absolute";
+                var overlayProjection = this.getProjection();
+                var position = overlayProjection.fromLatLngToDivPixel(this.pos);
+				this.div_.style.fontSize = this.style_.fontSize;
+				this.div_.style.color = this.style_.color;
+				this.div_.style.fontFamily = this.style_.fontFamily;
+                div.style.left = position.x + 'px';
+                div.style.top = position.y + 'px';
+                // We add an overlay to a map via one of the map's panes.
+                var panes = this.getPanes();
+                panes.floatPane.appendChild(div);
+            }
+			GeoXml.Label.prototype.getPosition = function () {
+				return this.pos;
+				}
+            GeoXml.Label.prototype.draw = function(){
+                var overlayProjection = this.getProjection();
+                var position = overlayProjection.fromLatLngToDivPixel(this.pos);
+                var div = this.div_;
+				var w = this.div_.clientWidth;
+				var h = this.div_.clientHeight;
+			//	if (console){ console.log("h="+h); }
+                div.style.left = parseInt(position.x - w/2) + 'px';
+                div.style.top = parseInt(position.y - h/2) + 'px';
+				}
+      
+            GeoXml.Label.prototype.onRemove = function(){
+				//console.log("label is being removed");
+                this.div_.parentNode.removeChild(this.div_);
+                this.div_ = null;
+            }
+            GeoXml.Label.prototype.hide = function(){
+                if (this.div_) {
+                    this.div_.style.visibility = "hidden";
+					//console.log("label is being hidden");
+					}
+				}
+
+            GeoXml.Label.prototype.show = function(){
+                if (this.div_) {
+                    this.div_.style.visibility = "visible";
+                }
+            }
+
+            GeoXml.Label.prototype.toggle = function(){
+                if (this.div_) {
+                    if (this.div_.style.visibility == "hidden") {
+                        this.show();
+                    }
+                    else {
+                        this.hide();
+                    }
+                }
+            }
+
+            GeoXml.Label.prototype.toggleDOM = function(){
+                if (this.getMap()) {
+                    this.setMap(null);
+                }
+                else {
+                    this.setMap(this.map_);
+                }
+            }
+
