@@ -47,6 +47,7 @@ function GeoXml(myvar, map, url, opts) {
   this.alwayspop = this.opts.alwaysinfopop || false;
   this.veryquiet = this.opts.veryquiet || false;
   this.quiet = this.opts.quiet || false;
+  this.rectangleLegend = this.opts.simplelegend || false;
   // infowindow styles
   this.titlestyle = this.opts.titlestyle || 'style = "font-family: arial, sans-serif;font-size: medium;font-weight:bold;"';
   this.descstyle = this.opts.descstyle || 'style = "font-family: arial, sans-serif;font-size: small;padding-bottom:.7em;"';
@@ -356,7 +357,10 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 			var obj = { "type": "point", "title": name, "description": name, "href": href, "shadow": shadow, "visibility": visible, "x": point.x, "y": point.y, "id": m.id };
 			this.kml[idx].marks.push(obj);
 			var parm;
-			var blob ="<span>&nbsp;</span>";
+			var blob = '<svg xmlns="http://www.w3.org/2000/svg" style="margin-left:0px;margin-top:0px" version="1.2" width="16px" height="16px">';
+			blob += '<text stroke="#bfb3b3" transform="matrix(0.757796 0 0 0.757796 0.200575 4.77596)" xml:space="preserve" text-anchor="middle" font-family="serif" font-size="24" id="svg_15" y="12.958634" x="7.370384" stroke-linecap="null" stroke-linejoin="null" stroke-dasharray="null" stroke-width="0" fill="'+ style.color +'">A</text>';
+			blob += '<text stroke="#bfb3b3" transform="matrix(0.781022 0 0 0.781022 2.09056 3.86291)" xml:space="preserve" text-anchor="middle" font-family="serif" font-size="24" id="svg_16" y="8.571944" x="13.233881" stroke-linecap="null" stroke-linejoin="null" stroke-dasharray="null" stroke-width="0" fill="'+style.color+'">a</text>';
+			blob += '</svg>';
 			var desc2="";
 			if(this.tileset){
 				parm = this.tileset + "$$$" + name + "$$$marker$$$" + n + "$$$" + blob + "$$$" + visible + "$$$null$$$" + desc2;
@@ -874,7 +878,25 @@ GeoXml.prototype.processLine = function (pnum, lnum, idx){
 
 	if(lnum == 0){
 	 	if(this.opts.sidebarid) {
-    			var blob = '&nbsp;&nbsp;<span style=";border-left:'+op.width+'px solid '+op.color+';">&nbsp;</span> ';
+    		var s_w = op.width;
+			if (s_w <= 2) {s_w = 2; } 
+			if (s_w >16) {s_w = 16; };
+			var blob;
+			if (this.rectangleLegend){
+				var m_w = parseInt(((16 - s_w)/2));
+				blob = '<svg xmlns="http://www.w3.org/2000/svg" style="margin-left:0px;margin-top:0px" version="1.2" fill="#ffeecc" width="16px" height="16px">';
+				if (op.color=='#ffffff' || op.color=='#FFFFFF'){
+					blob += ' <rect stroke="none" height="16" width="16" y="0" x="0" stroke-width="null" fill="#cbcbcb"/>';
+					}
+				blob += ' <rect stroke="none" height="16" width="'+s_w+'" y="0" x="'+m_w+'" stroke-width="null" fill="'+op.color+'"/></svg>';
+				}
+			else {
+				blob = '<svg xmlns="http://www.w3.org/2000/svg" style="margin-left:0px;margin-top:0px" version="1.2" fill="#ffeecc" width="16px" height="16px">';
+				if (op.color=='#ffffff' || op.color=='#FFFFFF'){
+					blob += ' <rect stroke="none" height="16" width="16" y="0" x="0" stroke-width="null" fill="#cbcbcb"/>';
+					}
+				blob += '<path stroke="'+op.color+'" d="m1.514515,10.908736c-0.457545,0.489079 0.473927,-7.091639 5.261762,-7.336174c4.787838,-0.244535 -0.457535,7.825252 4.804223,2.445392c5.261755,-5.37986 1.949991,11.609838 2.287748,3.179009"  stroke-width="2" fill="none"/></svg>';
+				}
 				
 			if(this.sidebarsnippet){
 				var desc2 = GeoXml.stripHTML(desc);
@@ -1256,7 +1278,16 @@ if(this.opts.polylabelclass && newgeom ) {
  
   if (this.basesidebar &&  newgeom) { 
     var folderid = this.myvar+"_folder"+idx;
-    var blob = "<span style=\"background-color:" + op.color + ";border:2px solid "+p.strokeColor+";\">&nbsp;&nbsp;&nbsp;&nbsp;</span> ";
+    var blob;
+	if (this.rectangleLegend){ 
+		blob = '<svg xmlns="http://www.w3.org/2000/svg" style="margin-left:0px;margin-top:0px" version="1.2" width="16px" height="16px">';
+		blob += ' <rect stroke="none" height="16" width="16" y="0" x="0" stroke-width="null" fill="'+op.color+'"/></svg>';
+		}
+	else {
+		blob = '<svg xmlns="http://www.w3.org/2000/svg" style="margin-left:0px;margin-top:0px" version="1.2" width="16px" height="16px">';
+		blob += '<path stroke="'+op.strokeColor+'" transform="rotate(139.901 9.70429 10.2675)" fill="'+op.color+'" stroke-dasharray="null" stroke-linejoin="null" stroke-linecap="null" d="m2.72366,9.83336c3.74686,-4.221 6.00924,-2.11097 7.43079,1.52863c1.42154,3.63961 3.85727,-1.60143 6.07385,1.67422c2.21659,3.27565 -4.2,6.26012 -7.17232,7.93434" id="svg_2"/></svg>';
+		}
+		
     if(this.sidebarsnippet){
 		var desc2 = GeoXml.stripHTML(desc);
 		desc2 = desc2.substring(0,20);}
@@ -1372,7 +1403,21 @@ GeoXml.prototype.finishLineJSON = function(po, idx, lastlinename){
 		}
 
 	if(that.basesidebar && lineisnew) {
-    		var blob = '&nbsp;&nbsp;<span style=";border-left:'+po.weight+'px solid '+po.color+';">&nbsp;</span> ';
+		var blob;
+		if (this.rectangleLegend){
+			var s_w = po.weight;
+			if (s_w < 1){ s_w = 1; }
+			var m_w = parseInt(((16 - s_w)/2));
+			blob = '<svg xmlns="http://www.w3.org/2000/svg" style="margin-left:0px;margin-top:0px" version="1.2" width="16px" height="16px">';
+			blob += ' <rect stroke="none" height="16" width="'+s_w+'" y="0" x="'+m_w+'" stroke-width="null" fill="'+po.color+'"/></svg>';
+			}
+		else {
+			blob = '<svg xmlns="http://www.w3.org/2000/svg" style="margin-left:0px;margin-top:0px" version="1.2" width="16px" height="16px">';
+			if (op.color=='#ffffff' || op.color=='#FFFFFF'){
+				blob += ' <rect stroke="none" height="16" width="16" y="0" x="0" stroke-width="null" fill="#cbcbcb"/>';
+				}
+			blob += '<path stroke="'+op.color+'" d="m1.514515,10.908736c-0.457545,0.489079 0.473927,-7.091639 5.261762,-7.336174c4.787838,-0.244535 -0.457535,7.825252 4.804223,2.445392c5.261755,-5.37986 1.949991,11.609838 2.287748,3.179009"  stroke-width="'+po.weight+'" fill="none"/></svg>';
+			}
 		if(typeof po.visibility == "undefined"){ po.visibility = true; }
 			if(this.sidebarsnippet){
 				var desc2 = GeoXml.stripHTML(desc);
@@ -4447,7 +4492,7 @@ GeoXml.prototype.makeWMSTileLayer = function(getmapstring, on, title, opac, attr
 	var styles = "";
 	var layers = "";
 	var queryable = false;
-	var opacity = 1.0;
+	var opacity = 0.5;
 	if(typeof opac!="undefined"){ opacity = opac; }
 	var bbox = "-180,-90,180,90";
 	var pairs = args[1].split("&");
@@ -6623,8 +6668,8 @@ MarkerClusterer.IMAGE_EXTENSION = "png";
  * @type {Array.<number>}
  * @constant
  */
-//MarkerClusterer.IMAGE_SIZES = [53, 56, 66, 78, 90];
+MarkerClusterer.IMAGE_SIZES = [53, 56, 66, 78, 90];
 
-MarkerClusterer.IMAGE_SIZES = [48, 54, 64, 74, 85];
+//MarkerClusterer.IMAGE_SIZES = [48, 54, 64, 74, 85];
 
 
