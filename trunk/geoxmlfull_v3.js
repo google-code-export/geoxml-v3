@@ -283,8 +283,8 @@ GeoXml.prototype.showIt = function (str, h, w) {
 		myWin.document.close();
 		}
 	};
-
-GeoXml.prototype.clear = function(idx) {
+	
+GeoXml.prototype.clear = function () {
 	for(var m=0;m<this.overlayman.markers.length;m++){
 		this.overlayman.RemoveMarker(this.overlayman.markers[m]);
 		}
@@ -299,20 +299,22 @@ GeoXml.prototype.clear = function(idx) {
   	this.polylines = [];
   	this.multibounds = []; 
 	this.bounds = new google.maps.LatLngBounds();
-  	this.overlayman = new MarkerClusterer(this.map, {}, this.optcluster);
+  	this.overlayman = new OverlayManager(this.map, this,this.opts.clustering);
   	this.overlayman.rowHeight = 20;
 	if(typeof this.basesidebar !="undefined" && this.basesidebar !=""){
 		Lance$(this.basesidebar).innerHTML = "";
 		}
+	this.currdeschead = "";
   	this.overlayman.folders.push([]);
   	this.overlayman.subfolders.push([]);
   	this.overlayman.folderhtml.push([]);
   	this.overlayman.folderhtmlast.push(0);
 	this.overlayman.byname = [];
     this.overlayman.byid = [];
+	this.filteredNames = [];
+	this.folderCBNames = [];
   	this.overlayman.folderBounds.push(new google.maps.LatLngBounds()); 
  	this.wmscount = 0;
-	this.currdeschead = "";
 	};
 
  
