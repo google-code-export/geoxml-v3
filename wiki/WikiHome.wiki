@@ -1,0 +1,9 @@
+#summary The GeoXml v3 interface works much like v2
+
+= Introduction =
+We recommend initially checking out the Version 2 wiki
+
+= Details =
+ 
+
+https://code.google.com/p/geoxml/w/list
