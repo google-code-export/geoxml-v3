@@ -2542,9 +2542,10 @@ GeoXml.prototype.handlePlacemarkGeometry = function(mark, geom, idx, depth, full
                         var preload = document.createElement("span");
                         preload.style.visibility = "visible";
                         preload.style.position = "absolute";
-                        preload.style.left = "-1200px";
-                        preload.style.top = "-1200px";
+                        preload.style.left = "-12000px";
+                        preload.style.top = "-12000px";
                         preload.style.zIndex = this.overlayman.markers.length;
+						preload.onload = function(){ preload.style.visibility = "hidden"; }
                         document.body.appendChild(preload);
                         preload.innerHTML = desc;
 						}
