@@ -1026,7 +1026,8 @@ GeoXml.prototype.processLine = function (pnum, lnum, idx, multi){
 				if(!point) { 
 					doit = true; //sidebar click
 					dest = p.infoWindow.position;
-					p.geoxml.map.fitBounds(p.getBounds());
+					p.geoxml.overlayman.zoomToFolder(idx);
+					//p.geoxml.map.fitBounds(p.getBounds());
 				} else {
 					dest = point.latLng;
 				}
