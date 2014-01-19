@@ -1,0 +1,10 @@
+#summary One-sentence summary of this page.
+
+= Introduction =
+
+Currently recommend checking out the V2 wiki 
+
+
+= Details =
+ 
+https://code.google.com/p/geoxml/wiki
