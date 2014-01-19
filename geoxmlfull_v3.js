@@ -875,6 +875,9 @@ GeoXml.prototype.processLine = function (pnum, lnum, idx, multi){
 	p = new google.maps.Polyline({map:this.map,path:line,strokeColor:op.color,strokeWeight:op.width,strokeOpacity:op.opacity});
 	p.bounds = op.pbounds;
 	p.id = op.id;
+	if (isnew == false) {
+		if(this.opts.sidebarid) { p.sidebar = this.latestsidebar; }
+		}
 	var nhtml = "";
 	var n = this.overlayman.markers.length;
 	var parm;
@@ -924,11 +927,10 @@ GeoXml.prototype.processLine = function (pnum, lnum, idx, multi){
 
 //	alert(op.lines.length);
 	if((lnum+1) < op.lines.length){
-//		alert("subline:"+lnum);
 		setTimeout(this.myvar+".processLine("+pnum+","+(lnum+1)+",'"+idx+"',"+multi+");",15);
-		if(this.opts.sidebarid) { p.sidebar = this.latestsidebar; }
 		}
 		
+	if(this.opts.sidebarid) { p.sidebar = this.latestsidebar; }	
 	if(this.opts.domouseover){
 		p.mess = html;
 		}
@@ -969,6 +971,7 @@ GeoXml.prototype.processLine = function (pnum, lnum, idx, multi){
 						});
 					}
 				}
+			//console.log(this.sidebar);
 			if(this.sidebar){
 				Lance$(this.sidebar).style.backgroundColor = this.hilite.color;
 				Lance$(this.sidebar).style.color = this.hilite.textcolor;
