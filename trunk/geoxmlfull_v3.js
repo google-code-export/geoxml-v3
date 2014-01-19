@@ -212,7 +212,10 @@ function GeoXml(myvar, map, url, opts) {
   this.overlayman.folderhtmlast.push(0);
   this.overlayman.folderBounds.push(new google.maps.LatLngBounds()); 
   this.wmscount = 0;
- // this.labels = new GTileLayerOverlay(G_HYBRID_MAP.getTileLayers()[1]);
+  
+  // patch for tooltips which dont seem to want to close 
+	google.maps.event.addListener(this.map, 'mousemove', function() { window.setTimeout(function(e) { GeoXml.tooltip.hide();}, 1);}); 
+			
   this.unnamedpath="un-named path";
   this.unnamedplace="un-named place";
   this.unnamedarea="un-named area";
@@ -5096,6 +5099,7 @@ GeoXml.tooltip = function(){
 				clearInterval(tt.timer);
 				if(d == -1){tt.style.display = 'none';}
 			}
+			//console.log(tt.style.opacity);
 		},
 		hide:function(){
 			if(typeof tt != "undefined"){
