@@ -3055,7 +3055,7 @@ GeoXml.prototype.processKML = function(node, marks, title, sbid, depth, paren) {
 	var n,ne,sw,se;
 	var html; 
 	var kml_id = node.getAttribute("id");
-	console.log("parent ="+node.nodeName);
+//	console.log("parent ="+node.nodeName);
 	for (var ln = 0; ln < node.childNodes.length; ln++) {
 		var nextn = node.childNodes.item(ln);
 		var nn = nextn.nodeName;
@@ -3156,9 +3156,9 @@ GeoXml.prototype.processKML = function(node, marks, title, sbid, depth, paren) {
 				break;
 			default:
 				for(var k=0;k<marks.length;k++){
-					console.log(marks[k]);
+					//console.log(marks[k]);
 					if(nn == marks[k]){
-						console.log("adding one" + nn)
+						//console.log("adding one" + nn)
 						pm.push(nextn);
 						break;
 						}					
@@ -3177,7 +3177,7 @@ GeoXml.prototype.processKML = function(node, marks, title, sbid, depth, paren) {
     	this.overlayman.folderhtml.push([]);
     	this.overlayman.folderhtmlast.push(0);
 		this.overlayman.folderBounds.push(new google.maps.LatLngBounds());
-		console.log("placemarks found "+pm.length);
+		//console.log("placemarks found "+pm.length);
   		this.kml.push(new KMLObj(title, desc, false, idx));
 		me = this.kml.length - 1;
 		var suppressfolder = false; //(pm.length == 2)
