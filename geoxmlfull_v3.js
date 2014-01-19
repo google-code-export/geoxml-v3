@@ -1026,13 +1026,13 @@ GeoXml.prototype.processLine = function (pnum, lnum, idx, multi){
 				if(!point) { 
 					doit = true; //sidebar click
 					dest = p.infoWindow.position;
-					p.geoxml.overlayman.zoomToFolder(idx);
-					//p.geoxml.map.fitBounds(p.getBounds());
+					var pline = this.geoxml.polylines[this.idx];
+					p.geoxml.map.fitBounds(pline.bounds);
 				} else {
 					dest = point.latLng;
-				}
-				p.infoWindow.setPosition(dest);
-				p.infoWindow.open(p.geoxml.map); 
+					p.infoWindow.setPosition(dest);
+					p.infoWindow.open(p.geoxml.map); 
+					}
 				}
 			} 
 		);
@@ -1051,6 +1051,8 @@ GeoXml.prototype.processLine = function (pnum, lnum, idx, multi){
 	this.bounds.extend(sw);
 	this.overlayman.folderBounds[idx].extend(sw);
 	this.overlayman.folderBounds[idx].extend(ne); 	
+	this.polylines[pnum].bounds.extend(ne);
+	this.polylines[pnum].bounds.extend(sw);
 	
 	n = this.overlayman.markers.length;
 	this.polylines[pnum].lineidx.push(n);
@@ -1073,6 +1075,7 @@ GeoXml.prototype.createPolyline = function(lines,color,width,opacity,pbounds,nam
 	p.visibility = visible;
 	if(that.hideall){ p.visibility = false; }
 	p.name = name;
+	p.bounds = new google.maps.LatLngBounds();
 	p.description = desc;
 	p.lines = [];
 	p.lines.push(lines);
