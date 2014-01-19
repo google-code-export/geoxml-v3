@@ -957,7 +957,7 @@ GeoXml.prototype.processLine = function (pnum, lnum, idx, multi){
 		}
 
 	
-  	p.onOver = function(){
+  	p.onOver = function(e){
 		var pline = this.geoxml.polylines[this.idx];
 		if(this.geoxml.dohilite){
 			if(this.hidden!=true){
@@ -977,6 +977,9 @@ GeoXml.prototype.processLine = function (pnum, lnum, idx, multi){
 				Lance$(this.sidebar).style.color = this.hilite.textcolor;
 				}
 			}
+		if(this.title){
+			GeoXml.tooltip.show(this.title,e);
+			} 
 		if(this.mess) { this.geoxml.mb.showMess(this.mess,5000); } else { this.title = "Click for more information about "+this.mytitle; }
 		};
   	p.onOut = function(){ 
@@ -999,6 +1002,7 @@ GeoXml.prototype.processLine = function (pnum, lnum, idx, multi){
 				Lance$(this.sidebar).style.color = "";
 				}
 			}
+		GeoXml.tooltip.hide();
 		this.geoxml.mb.hideMess();
 		};
 
@@ -1211,7 +1215,7 @@ GeoXml.prototype.finishPolygonJSON = function(op,idx,updatebound,lastpoly) {
 			
 	polygon.infoWindow = new google.maps.InfoWindow(infoWindowOptions);
 				
-  polygon.onOver = function(){ 
+  polygon.onOver = function(e){ 
 		if(this.geoxml.dohilite){
 			if(this.sidebarid){
 				var bar = Lance$(this.sidebarid);
@@ -1234,6 +1238,9 @@ GeoXml.prototype.finishPolygonJSON = function(op,idx,updatebound,lastpoly) {
 				}
 			}
 		}
+		if(polygon.title){
+			GeoXml.tooltip.show(polygon.title,e);
+			}
 	if(this.mess){ polygon.geoxml.mb.showMess(this.mess,5000); }
 	};
 
@@ -5015,6 +5022,89 @@ GeoXml.Label.prototype.toggleDOM = function(){
 	}
 }
 
+
+GeoXml.tooltip = function(){
+	var id = 'tooltip';
+	var top = 3;
+	var left = 3;
+	var maxw = 300;
+	var speed = 10;
+	var timer = 20;
+	var endalpha = 95;
+	var alpha = 0;
+	var tt,t,c,b,h;
+	var ie = document.all ? true : false;
+	return{
+		show:function(v,w){
+			if(tt == null){
+				tt = document.createElement('div');
+				tt.style.backgroundColor = "white";
+				tt.style.padding = "3px";
+				tt.style.position = "absolute";
+				tt.style.zIndex = 60000;
+				tt.style.fontFamily = "Arial,sans-serif";
+				tt.style.fontSize = "10px";
+				tt.setAttribute('id',id);
+				t = document.createElement('div');
+				t.setAttribute('id',id + 'top');
+				c = document.createElement('div');
+				c.setAttribute('id',id + 'cont');
+				b = document.createElement('div');
+				b.setAttribute('id',id + 'bot');
+				tt.appendChild(t);
+				tt.appendChild(c);
+				tt.appendChild(b);
+				document.body.appendChild(tt);
+				tt.style.opacity = 0;
+				tt.style.filter = 'alpha(opacity=0)';
+				document.onmousemove = this.pos;
+			}
+			tt.style.display = 'block';
+			c.innerHTML = v;
+			tt.style.width = w ? w + 'px' : 'auto';
+			if(!w && ie){
+				t.style.display = 'none';
+				b.style.display = 'none';
+				tt.style.width = tt.offsetWidth;
+				t.style.display = 'block';
+				b.style.display = 'block';
+			}
+			if(tt.offsetWidth > maxw){tt.style.width = maxw + 'px';}
+			h = parseInt(tt.offsetHeight) + top;
+			clearInterval(tt.timer);
+			tt.timer = setInterval(function(){GeoXml.tooltip.fade(1);},timer);
+		},
+		pos:function(e){
+			var u = ie ? event.clientY + document.documentElement.scrollTop : e.pageY;
+			var l = ie ? event.clientX + document.documentElement.scrollLeft : e.pageX;
+			tt.style.top = (u - h) + 'px';
+			tt.style.left = (l + left) + 'px';
+		},
+		fade:function(d){
+			var a = alpha;
+			if((a != endalpha && d == 1) || (a != 0 && d == -1)){
+				var i = speed;
+				if(endalpha - a < speed && d == 1){
+					i = endalpha - a;
+				}else if(alpha < speed && d == -1){
+					i = a;
+				}
+				alpha = a + (i * d);
+				tt.style.opacity = alpha * 0.01;
+				tt.style.filter = 'alpha(opacity=' + alpha + ')';
+			}else{
+				clearInterval(tt.timer);
+				if(d == -1){tt.style.display = 'none';}
+			}
+		},
+		hide:function(){
+			if(typeof tt != "undefined"){
+				if(tt.timer){ clearInterval(tt.timer); }
+				tt.timer = setInterval(function(){GeoXml.tooltip.fade(-1);},timer);	
+				}
+			}
+	};
+}();
 /*jslint browser: true, confusion: true, sloppy: true, vars: true, nomen: false, plusplus: false, indent: 2 */
 /*global window,google */
 
