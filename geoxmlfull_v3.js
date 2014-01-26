@@ -1911,6 +1911,7 @@ GeoXml.addSidebar = function(myvar, name, type, e, graphic, ckd, i, snippet) {
     else {
 	    snippet = "";
     }
+	console.log(name);
    switch(type) {
    case  "marker" :  h = '<li id="'+mid+'" onmouseout="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'mouseout\');" onmouseover="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'mouseover\');" ><input id="'+myvar+''+e+'CB" type="checkbox" style="vertical-align:middle" '+check+' onclick="'+myvar+'.showHide('+e+',this.checked)"><a href="#" onclick="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'click\');return false;">'+ graphic + '&nbsp;' + name + '</a>'+snippet+'</li>';
    break;
@@ -2298,7 +2299,11 @@ GeoXml.prototype.handleGeomark = function (mark, idx, trans) {
             that.bounds.extend(point);
             // Does the user have their own createmarker function?
 	    if(!skiprender){
-		    if(typeof name == "undefined"){ name= that.unnamedplace; }
+		    if(typeof name == "undefined"){ 
+				name = GeoXml.stripHTML(dc.desc);
+				desc=''; 
+				}
+			if (name == desc) { desc = ""; }
         	    if (!!that.opts.createmarker) {
           		    that.opts.createmarker(point, name, desc, styleid, idx, null, visible);
         		    } 
@@ -2337,7 +2342,8 @@ GeoXml.prototype.handleGeomark = function (mark, idx, trans) {
             opacity = this.style.opacity;
           }
           // Does the user have their own createpolyline function?
-	  if(typeof name == "undefined"){ name=that.unnamedpath; }
+	  if(typeof name == "undefined"){ name = GeoXml.stripHTML(dc.desc); }
+	  if (name == desc) { desc = ""; }
           if (!!that.opts.createpolyline) {
             that.opts.createpolyline(lines,color,width,opacity,pbounds,name,desc,idx,visible);
           } else {
@@ -2365,7 +2371,8 @@ GeoXml.prototype.handleGeomark = function (mark, idx, trans) {
 	fill = 1;
 	outline = 1;
 	//alert("found Polygon");
-	if(typeof name == "undefined"){ name=that.unnamedarea; }
+	if(typeof name == "undefined"){ name = GeoXml.stripHTML(desc); desc = "" }
+	if (name == desc) { desc = ""; }
  	if (!!that.opts.createpolygon) {
             that.opts.createpolygon(lines,color,width,opacity,fillColor,fillOpacity,pbounds,name,desc,idx,visible,fill,outline);
           } else {
@@ -2689,7 +2696,8 @@ GeoXml.prototype.handlePlacemarkGeometry = function(mark, geom, idx, depth, full
 			this.overlayman.folderBounds[idx].extend(point);
 						// Does the user have their own createmarker function?
 			if (!skiprender) {
-				if (typeof name == "undefined") { name = that.unnamedplace; }
+				if (typeof name == "undefined") { name = GeoXml.stripHTML(desc); desc = "";}
+				if (name == desc) { desc = ""; }
 				if (!!that.opts.createmarker) {
 					that.opts.createmarker(point, name, desc, styleid, idx, style, visible, kml_id, markerurl, snippet);
 					}
@@ -2723,7 +2731,8 @@ GeoXml.prototype.handlePlacemarkGeometry = function(mark, geom, idx, depth, full
 						this.overlayman.folderBounds[idx].extend(point);
 						// Does the user have their own createmarker function?
 						if (!skiprender) {
-							if (typeof name == "undefined") { name = that.unnamedplace; }
+							if (typeof name == "undefined") { name = GeoXml.stripHTML(desc); desc = ""; }
+							if (name == desc) { desc = ""; }
 							if (!!that.opts.createmarker) {
 								that.opts.createmarker(point, name, desc, styleid, idx, style, visible, kml_id, markerurl, snippet);
 							}
@@ -2764,7 +2773,8 @@ GeoXml.prototype.handlePlacemarkGeometry = function(mark, geom, idx, depth, full
                 opacity = this.style.opacity;
             }
             // Does the user have their own createmarker function?
-            if (typeof name == "undefined") { name = unnamedpath; }
+            if (typeof name == "undefined") { name = GeoXml.stripHTML(desc); desc = ""; }
+			if (name == desc) { desc = ""; }
             if (!!that.opts.createpolyline) {
                 that.opts.createpolyline(lines, color, width, opacity, pbounds, name, desc, idx, visible, kml_id);
             } else {
@@ -2786,7 +2796,8 @@ GeoXml.prototype.handlePlacemarkGeometry = function(mark, geom, idx, depth, full
             if (typeof fill == "undefined") { fill = 0; }
             if (typeof color == "undefined") { color = this.style.color; }
             if (typeof fillcolor == "undefined") { fillcolor = this.randomColor(); }
-            if (typeof name == "undefined") { name = that.unnamedarea; }
+            if (typeof name == "undefined") { name = GeoXml.stripHTML(desc); desc = ""; }
+			if (name == desc) { desc = ""; }
             if (!!that.opts.createpolygon) {
                 that.opts.createpolygon(lines, color, width, opacity, fillcolor, fillOpacity, pbounds, name, desc, idx, visible, fill, outline, kml_id);
             } else {
