@@ -1748,6 +1748,7 @@ GeoXml.prototype.hide = function(){
 		this.contentToggle(1,false);
 		this.overlayman.currentZoomLevel = -1;
 		OverlayManager.Display(this.overlayman);
+		google.events.trigger(this,"changed");
 	//	}
 	//else {
 	//does not support matching sidebar entry toggling yet
@@ -1768,6 +1769,7 @@ GeoXml.prototype.show = function(){
 		this.contentToggle(1,true);
 		this.overlayman.currentZoomLevel = -1;
 		OverlayManager.Display(this.overlayman);
+	
 	//	}
 	//else {
 	//does not support matching sidebar entry toggling yet
@@ -1835,6 +1837,8 @@ GeoXml.prototype.contentToggle = function(i,show){
 				}
 			}
 		 }
+		google.events.trigger(this,"changed");
+		console.log("changed "+f);
 	};
 
 
@@ -3944,7 +3948,7 @@ OverlayManager = function ( map , paren, opts) {
 	this.optcluster.ClusterZoom = this.ClusterZoom;
 	this.optcluster.ClusterInfoWindow = this.ClusterInfoWindow;
 	this.optcluster.imagePath = this.ClusterIconUrl;
-	this.cluster = new MarkerClusterer(this.map, {}, this.optcluster);
+	this.cluster = new MarkerClusterer(this.map, {}, this.optcluster,this.paren);
 	
 	google.maps.event.addListener( this.paren, 'adjusted',OverlayManager.MakeCaller( OverlayManager.Display, this ) );
 	google.maps.event.addListener( map, 'idle', OverlayManager.MakeCaller( OverlayManager.Display, this ) );
@@ -5841,7 +5845,7 @@ Cluster.prototype.isMarkerAlreadyAdded_ = function (marker) {
  * @param {Array.<google.maps.Marker>} [opt_markers] The markers to be added to the cluster.
  * @param {MarkerClustererOptions} [opt_options] The optional parameters.
  */
-function MarkerClusterer(map, opt_markers, opt_options) {
+function MarkerClusterer(map, opt_markers, opt_options, paren) {
   // MarkerClusterer implements google.maps.OverlayView interface. We use the
   // extend function to extend MarkerClusterer with google.maps.OverlayView
   // because it might not always be available when the code is defined so we
@@ -5851,7 +5855,7 @@ function MarkerClusterer(map, opt_markers, opt_options) {
 
   opt_markers = opt_markers || [];
   opt_options = opt_options || {};
-
+  this.paren = this.paren; 
   this.markers_ = [];
   this.clusters_ = [];
   this.listeners_ = [];
@@ -5936,7 +5940,7 @@ MarkerClusterer.prototype.onAdd = function () {
 //  ];
   this.listeners_ = [
     google.maps.event.addListener(this.getMap(), "idle", function () {
-      cMarkerClusterer.redraw_();
+      cMarkerClusterer.redraw_(); 
     })
   ];
 };
