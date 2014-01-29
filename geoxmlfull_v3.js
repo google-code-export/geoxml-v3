@@ -434,6 +434,8 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 	            href = "http://maps.google.com/mapfiles/kml/pal3/icon40.png";
 				}
 	        icon = bicon;//new google.maps.MarkerImage(bicon);
+			bicon.size = null;
+			bicon.scaledSize = new google.maps.Size(32*scale, 32*scale); //scaledSize 
 			icon.url = href;  
 			}
 	    else {
@@ -474,7 +476,7 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 			var result;
 			var pattern2 = /href\s*=\s*[\'\"]/;
 			var pattern3 = /[\'\"]/;
-				while ((result = pattern.exec(text))!= null) {
+			while ((result = pattern.exec(text))!= null) {
 				var stuff = text.substr(result.index);
 				var result2 = pattern2.exec(stuff);
 					if (result2!= null) {
@@ -485,7 +487,7 @@ GeoXml.prototype.createMarker = function(point, name, desc, styleid, idx, instyl
 							}
 						}
 					}
-		}
+				}
 		if (this.extcontentmarkers){
 			var contentUrl = Array();
 			var text = desc;
