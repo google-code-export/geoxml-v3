@@ -1839,8 +1839,8 @@ GeoXml.prototype.contentToggle = function(i,show){
 				}
 			}
 		 }
-		google.events.trigger(this,"changed");
-		console.log("changed "+f);
+		//google.events.trigger(this,"changed");
+		//console.log("changed "+f);
 	};
 
 
@@ -1899,7 +1899,7 @@ GeoXml.prototype.toggleOff = function(a,show){
 		this.overlayman.markers[a].setMap(null);
 		this.overlayman.markers[a].hidden = true;
 		}
-	if(this.labels.onMap){
+	if(this.labels && this.labels.onMap){
 		this.labels.setMap(null);
  		this.labels.setMap(this.map); 
 		}
