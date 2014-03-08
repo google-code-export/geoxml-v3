@@ -1279,19 +1279,21 @@ GeoXml.prototype.finishPolygonJSON = function(op,idx,updatebound,lastpoly) {
 	};
 	
 	polygon.onClick = function(point) {
-		if(!point && this.geoxml.alwayspop){
+		if(!!!point && this.geoxml.alwayspop){
 			bounds = this.geoxml.multibounds[this.geomindex]; 
 			this.geoxml.map.fitBounds(bounds);
 			point = {};
 			point.latLng = bounds.getCenter(); 
 			}
-		if(!point){ 
+		if(!!!point){ 
 			this.geoxml.mb.showMess("Zooming to "+polygon.title,3000);
 			bounds = this.geoxml.multibounds[this.geomindex];  
 			this.geoxml.map.fitBounds(bounds);
 			point = bounds.getCenter();
-		} else
+		} else {
 			point = point.latLng;
+			}
+	 
 		if(this.geoxml.clickablepolys){ 
 			if (!!this.geoxml.opts.singleInfoWindow) {
 				if (!!this.geoxml.lastMarker && !!this.geoxml.lastMarker.infoWindow) {
@@ -1301,7 +1303,7 @@ GeoXml.prototype.finishPolygonJSON = function(op,idx,updatebound,lastpoly) {
 				}
 			this.infoWindow.setPosition(point);
 			this.infoWindow.open(this.geoxml.map);
-		}
+			}
 		};
 	
 	google.maps.event.addListener(polygon,"click",polygon.onClick );
@@ -1449,8 +1451,8 @@ GeoXml.prototype.finishLineJSON = function(po, idx, lastlinename){
 	m.infoWindow = new google.maps.InfoWindow(infoWindowOptions);
 	if(this.clickablelines){
   		google.maps.event.addListener(m,"click", function(point) {
-		if(!point){ point=m.getPosition(); } 
-			this.infoWindow.open();
+		if(!!!point){ point=m.getPosition(); } 
+			m.infoWindow.open();
 		} );
 		}
 
@@ -1921,9 +1923,9 @@ GeoXml.addSidebar = function(myvar, name, type, e, graphic, ckd, i, snippet) {
    switch(type) {
    case  "marker" :  h = '<li id="'+mid+'" onmouseout="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'mouseout\');" onmouseover="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'mouseover\');" ><input id="'+myvar+''+e+'CB" type="checkbox" style="vertical-align:middle" '+check+' onclick="'+myvar+'.showHide('+e+',this.checked)"><a href="#" onclick="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'click\');return false;">'+ graphic + '&nbsp;' + name + '</a>'+snippet+'</li>';
    break;
-  case  "polyline" :  h = '<li id="'+mid+'"  onmouseout="'+myvar+ '.overlayman.markers['+e+'].onOut();" onmouseover="'+myvar+ '.overlayman.markers['+e+'].onOver();" ><input id="'+myvar+''+e+'CB" type="checkbox" '+check+' onclick="'+myvar+'.showHide(null,this.checked,'+i+')"><span style="margin-top:6px;"><a href="#" onclick="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'click\',{});return false;">&nbsp;' + graphic + '&nbsp;' + name + '</a></span>'+snippet+'</li>';
+  case  "polyline" :  h = '<li id="'+mid+'"  onmouseout="'+myvar+ '.overlayman.markers['+e+'].onOut();" onmouseover="'+myvar+ '.overlayman.markers['+e+'].onOver();" ><input id="'+myvar+''+e+'CB" type="checkbox" '+check+' onclick="'+myvar+'.showHide(null,this.checked,'+i+')"><span style="margin-top:6px;"><a href="#" onclick="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'click\');return false;">&nbsp;' + graphic + '&nbsp;' + name + '</a></span>'+snippet+'</li>';
   break;
-  case "polygon": h = '<li id="'+mid+'"  onmouseout="'+myvar+ '.overlayman.markers['+e+'].onOut();" onmouseover="'+myvar+ '.overlayman.markers['+e+'].onOver();" ><input id="'+myvar+''+e+'CB" type="checkbox" '+check+' onclick="'+myvar+'.showHide('+e+',this.checked)"><span style="margin-top:6px;"><a href="#" onclick="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'click\',{});return false;">&nbsp;' + graphic + '&nbsp;' + name + '</a></span></nobr>'+snippet+'</li>';
+  case "polygon": h = '<li id="'+mid+'"  onmouseout="'+myvar+ '.overlayman.markers['+e+'].onOut();" onmouseover="'+myvar+ '.overlayman.markers['+e+'].onOver();" ><input id="'+myvar+''+e+'CB" type="checkbox" '+check+' onclick="'+myvar+'.showHide('+e+',this.checked)"><span style="margin-top:6px;"><a href="#" onclick="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'click\');return false;">&nbsp;' + graphic + '&nbsp;' + name + '</a></span></nobr>'+snippet+'</li>';
   break;
  case "groundoverlay": h = '<li id="'+mid+'"><input id="'+myvar+''+e+'CB" type="checkbox" '+check+' onclick="'+myvar+'.showHide('+e+',this.checked)"><span style="margin-top:6px;"><a href="#" onclick="google.maps.event.trigger(' + myvar+ '.overlayman.markers['+e+'],\'zoomto\');return false;">&nbsp;' + graphic + '&nbsp;' + name + '</a></span>'+snippet+'</li>';
    break;
