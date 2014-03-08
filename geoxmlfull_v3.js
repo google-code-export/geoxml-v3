@@ -2799,7 +2799,7 @@ GeoXml.prototype.handlePlacemarkGeometry = function(mark, geom, idx, depth, full
                 fill = style.fill;
                 outline = style.outline;
 				}	
-            if (typeof fill == "undefined") { fill = 0; }
+            if (typeof fill == "undefined") { fill = 1; }
             if (typeof color == "undefined") { color = this.style.color; }
             if (typeof fillcolor == "undefined") { fillcolor = this.randomColor(); }
             if (typeof name == "undefined") { name = GeoXml.stripHTML(desc); desc = ""; }
