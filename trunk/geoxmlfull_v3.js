@@ -879,7 +879,11 @@ GeoXml.prototype.processLine = function (pnum, lnum, idx, multi){
     var thismap = this.map;
 	var iwoptions = this.opts.iwoptions || {};
  	obj = { points:line, color:op.color, weight:op.width, opacity:op.opacity, type:"line", id: op.id };
-	p = new google.maps.Polyline({map:this.map,path:line,strokeColor:op.color,strokeWeight:op.width,strokeOpacity:op.opacity});
+	var pline = line;
+	if (line.length == 1) {
+		pline = line[0];
+		}
+	p = new google.maps.Polyline({map:this.map,path:pline,strokeColor:op.color,strokeWeight:op.width,strokeOpacity:op.opacity});
 	p.bounds = op.pbounds;
 	p.id = op.id;
 	if (isnew == false) {
